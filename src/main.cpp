@@ -55,7 +55,7 @@ void scanNetworks(String opts) {
     Serial.println(" networks found\n");
     for (int i = 0; i < n; ++i) {
       String enc = (WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? "[O]" : "[*]";
-      Serial.printf("%02d %s[%i][%s]\n",i+1,enc.c_str(),WiFi.RSSI(i),WiFi.SSID(i).c_str());
+      Serial.printf("%02d %s[%i][%s]\r\n",i+1,enc.c_str(),WiFi.RSSI(i),WiFi.SSID(i).c_str());
       delay(10);
     }
   }
