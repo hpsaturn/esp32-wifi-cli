@@ -20,28 +20,37 @@
 
 #include <M5Atom.h>
 #include <SerialTerminal.hpp>
-#include "WiFi.h"
+#include <WiFi.h>
+#include <WiFiMulti.h>
 
 maschinendeck::SerialTerminal* term;
+WiFiMulti wifiMulti;
+const uint32_t connectTimeoutMs = 10000;
 
 String ssid = "";
 String pasw = "";
 
 void printWifiSettings() {
-  Serial.print("\nWiFi Connect To : [");
+  Serial.print("\nWiFi SSID \t: [");
   Serial.println(WiFi.SSID()+"]");       //Output Network name.
-  Serial.print("IP address   \t: ");
-  Serial.println(WiFi.localIP());    //Output IP Address.
-  Serial.print("RSSI\t\t: ");
-  Serial.println(WiFi.RSSI());       //Output signal strength.
+  Serial.print("IP address  \t: ");
+  Serial.println(WiFi.localIP());        //Output IP Address.
+  Serial.print("RSSI signal \t: ");
+  Serial.println(WiFi.RSSI());           //Output signal strength.
+  Serial.print("MAC Address\t: ");
+  Serial.println(WiFi.macAddress());     //Output MAC address.
+  Serial.print("Hostname\t: ");
+  Serial.println(WiFi.getHostname());       //Output hostname.
 }
 
 void printHelp(String opts) {
   Serial.println("\nUsage:\n");
-  Serial.println("setSSID \"YOUR SSID\"");
-  Serial.println("setPassword \"YOUR PASSWORD\"");
+  Serial.println("setSSID     \t\"YOUR SSID\"");
+  Serial.println("setPassword \t\"YOUR PASSWORD\"");
   Serial.println("connect");
   Serial.println("scan");
+  Serial.println("status");
+  Serial.println("disconnect");
 }
 
 void scanNetworks(String opts) {
@@ -61,6 +70,23 @@ void scanNetworks(String opts) {
   }
 }
 
+void wifiLoop () {
+  static uint_least64_t wifiTimeStamp = 0;
+  if (millis() - wifiTimeStamp > 1000) {
+    wifiTimeStamp = millis();
+    if(WiFi.status() == WL_CONNECTED) M5.dis.fillpix(0x00ff00); // set LED to green
+    else M5.dis.fillpix(0xffff00); // set LED to yellow
+  }
+}
+
+void wifiStatus(String opts) {
+  if(WiFi.status() == WL_CONNECTED) {
+    printWifiSettings();
+  } else {
+    Serial.println("\nWiFi is not connected");
+  }
+}
+
 void setSSID(String opts) {
   ssid = maschinendeck::SerialTerminal::ParseArgument(opts);
   if (ssid.length() == 0) {
@@ -77,39 +103,48 @@ void setPassword(String opts) {
   Serial.println("\nsaved password to \t: " + pasw);
 }
 
+void disconnect(String opts) {
+  Serial.println("\nDisconnecting...");
+  WiFi.disconnect();
+}
+
 void connect(String opts) {
-  WiFi.begin(ssid.c_str(), pasw.c_str());
+  Serial.print("\nconnecting..");
+  wifiMulti.addAP(ssid.c_str(), pasw.c_str());
   int retry = 0;
-  Serial.print("\nconnecting.");
-  while (WiFi.status() != WL_CONNECTED && retry++<20) { // M5Atom will connect automatically
+  while (wifiMulti.run(connectTimeoutMs) != WL_CONNECTED && retry++<20) { // M5Atom will connect automatically
     delay(500);
     Serial.print(".");
   }
   if (WiFi.status() == WL_CONNECTED) {
-    M5.dis.fillpix(0x00ff00);   // set LED to green
     Serial.println("connected!");
-    printWifiSettings();
+    delay(100);
+    wifiStatus(opts);
   }
   else {
     Serial.println("connection failed!");
-    M5.dis.fillpix(0xffff00);   // set LED to yellow
   }
 }
 
 void setup() {
   M5.begin(true,false,true);  //Init Atom(Initialize serial port, LED)
   M5.dis.fillpix(0xffffff);   //Light LED with the specified RGB color.
-  delay(1000);
+  WiFi.mode(WIFI_STA);
+  delay(100);
   Serial.flush();
   Serial.println("\n\n");
+
   term = new maschinendeck::SerialTerminal(115200);
   term->add("help", &printHelp, "\tshow help and usage information");
   term->add("setSSID", &setSSID, "\tset the Wifi SSID");
   term->add("setPassword", &setPassword, "set the WiFi password"); 
-  term->add("connect", &connect, "\tconnect to the WiFi station");
+  term->add("connect", &connect, "\tconnect or add WiFi network");
   term->add("scan", &scanNetworks, "\tscan WiFi networks");
+  term->add("status", &wifiStatus, "\tWiFi status information");
+  term->add("disconnect", &disconnect, "WiFi disconnect");
 }
 
 void loop() {
   term->loop();
+  wifiLoop();
 }
