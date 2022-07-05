@@ -63,7 +63,7 @@ void printHelp(String opts) {
   Serial.println("scan \t\t\tscan for available networks");
   Serial.println("status \t\t\tprint the current WiFi status");
   Serial.println("disconnect \t\tdisconnect from the network");
-  // Serial.println("delete <number>\t\t\tremove saved network");
+  Serial.println("delete \"SSID\"\t\tremove saved network");
   Serial.println("help \t\t\tprint this help");
 }
 
@@ -118,7 +118,7 @@ void loadSavedNetworks(bool addAP) {
     String ssid = cfg.getString(String(key + "_ssid").c_str(), "");
     String pasw = cfg.getString(String(key + "_pasw").c_str(), "");
     String dfl = (net == default_net) ? "*" : " ";
-    Serial.printf("(%s) %d: [%s][%s]\r\n",dfl.c_str(), net, ssid.c_str(), pasw.c_str());
+    Serial.printf("(%s) %d: [%s]\r\n",dfl.c_str(), net, ssid.c_str());
     if(addAP) wifiMulti.addAP(ssid.c_str(), pasw.c_str());
     net++;
   }
@@ -131,33 +131,47 @@ void listNetworks(String opts) {
 }
 
 bool isSSIDSaved(String ssid) {
+  cfg.begin("wifi_cli_prefs", RO_MODE);
+  bool isSaved = false;
   int net = 1;
   while (cfg.isKey(String(getNetKeyName(net)+"_ssid").c_str())) {
-    String key = getNetKeyName(net);
+    String key = getNetKeyName(net++);
     String ssid_ = cfg.getString(String(key + "_ssid").c_str(), "");
-    if (ssid_ == ssid) return true;
-    net++;
+    if (ssid_.equals(ssid)){
+      isSaved = true;
+      break;
+    }
   }
-  return false;
+  cfg.end();
+  return isSaved;
 }
 
 void deleteNetwork(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
-  int net = operands.first().toInt();
+  String ssid = maschinendeck::SerialTerminal::ParseArgument(opts);
+  int net = 1;
+  bool dropped = false;
   cfg.begin("wifi_cli_prefs", RW_MODE);
-  if (net > 0 && net < 100) {
-    String key = getNetKeyName(net);
-    if (!cfg.isKey(String(key + "_ssid").c_str())) {
-      Serial.println("\nNetwork not found");
-      cfg.end();
-      return;
+  while (cfg.isKey(String(getNetKeyName(net)+"_ssid").c_str())) {
+    String key = getNetKeyName(net++);
+    String ssid_ = cfg.getString(String(key + "_ssid").c_str(), "");
+    if (!dropped && ssid_.equals(ssid)){
+      Serial.printf("Deleting network %d %s\r\n", net-1, key.c_str());
+      cfg.remove(String(key + "_ssid").c_str());
+      cfg.remove(String(key + "_pasw").c_str());
+      dropped = true;
+      int net_count = cfg.getInt("net_count", 0);
+      cfg.putInt("net_count", net_count-1);
+      continue;
     }
-    // cfg.remove(String(key + "_ssid").c_str());
-    // cfg.remove(String(key + "_pasw").c_str());
-    Serial.printf("\nNetwork %s deleted", String(key+"_ssid").c_str());
-  } 
-  else {
-    Serial.println("\nInvalid network number");
+    if(dropped) {
+      String ssid_drop = cfg.getString(String(key + "_ssid").c_str(), "");
+      String pasw_drop = cfg.getString(String(key + "_pasw").c_str(), "");
+      String key_drop = getNetKeyName(net-2);
+      cfg.putString(String(key_drop + "_ssid").c_str(), ssid_drop);
+      cfg.putString(String(key_drop + "_pasw").c_str(), pasw_drop);
+      cfg.remove(String(key + "_ssid").c_str());
+      cfg.remove(String(key + "_pasw").c_str());
+    }
   }
   cfg.end();
 }
@@ -206,6 +220,10 @@ bool wifiValidation() {
 }
 
 void wifiAPConnect(bool save) {
+  if (temp_ssid.length() == 0) {
+    Serial.println("\nSSID is empty, please set a valid SSID into quotes\n");
+    return;
+  } 
   Serial.print("\nConnecting to " + temp_ssid + "...");
   if(save) wifiMulti.addAP(temp_ssid.c_str(), temp_pasw.c_str());
   int retry = 0;
@@ -240,6 +258,7 @@ void selectAP(int net){
   cfg.begin("wifi_cli_prefs", RW_MODE);
   cfg.putInt("default_net", net);
   cfg.end();
+  listNetworks("");
 }
 
 void selectAP(String opts) {
@@ -288,15 +307,16 @@ void connect(String opts) {
     disconnect(opts);
     delay(1000);
   }
+  if(temp_ssid.length() == 0) {
+    Serial.println("\nSSID is empty, please set a valid SSID into quotes\n");
+    return;
+  } 
   if(isSSIDSaved(temp_ssid)) {
     wifiAPConnect(false);
     return;
   }
   else if(temp_ssid.length() > 0) {
     wifiAPConnect(true); 
-  }
-  else {
-    multiWiFiConnect(); //TODO: change to user selection
   }
 }
 
@@ -323,6 +343,7 @@ void setup() {
   term->add("scan", &scanNetworks, "\tscan WiFi networks");
   term->add("status", &wifiStatus, "\tWiFi status information");
   term->add("disconnect", &disconnect, "WiFi disconnect");
+  term->add("delete", &deleteNetwork, "\tremove saved WiFi network by SSID");
 }
 
 void loop() {
