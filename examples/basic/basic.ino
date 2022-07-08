@@ -19,17 +19,11 @@
  *********************************************************************/
 
 #include <Arduino.h>
-#include <M5Atom.h>
 #include <ESP32WifiCLI.hpp>
 
 void setup() {
-  M5.begin(true,false,true);  //Init Atom(Initialize serial port, LED)
-  M5.dis.fillpix(0xffffff);   //Light LED with the specified RGB color. 
   Serial.flush();
-  delay(1000);
-  Serial.println("\n");
-  // loadNetworks(true);
-  // reconnect();
+  delay(100);
   wcli.begin();
 }
 

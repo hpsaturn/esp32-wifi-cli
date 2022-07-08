@@ -292,12 +292,13 @@ void ESP32WifiCLI::loop() {
   term->loop();
   static uint_least64_t wifiTimeStamp = 0;
   if (millis() - wifiTimeStamp > 1000) {
-    // wifiMulti.run(connectTimeoutMs);
     wifiTimeStamp = millis();
-    // if(WiFi.status() == WL_CONNECTED) M5.dis.fillpix(0x00ff00); // set LED to green
-    // else M5.dis.fillpix(0xffff00); // set LED to yellow
-    // M5.dis.setBrightness(5); // set brightness to 50%
+    if(cb != nullptr) cb->onWifiStatus(WiFi.status() == WL_CONNECTED); 
   }
+}
+
+void ESP32WifiCLI::setCallback(ESP32WifiCLICallbacks* pcb) {
+  this->cb = pcb;
 }
 
 void _scanNetworks(String opts) {
