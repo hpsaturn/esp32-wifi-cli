@@ -1,0 +1,54 @@
+{
+  "name": "ESP32 Wifi CLI",
+  "version": "0.1.0",
+  "homepage":"https://github.com/hpsaturn/esp32-wifi-cli#readme",
+  "keywords": 
+  [ 
+    "CLI",
+    "command line",
+    "basic",
+    "Wifi",
+    "ESP32",
+    "terminal",
+    "WifiCLI",
+    "ESP32WifiCLI",
+    "ESP8266"
+  ],
+  "description":"Basic and extendible Wifi manager via serial command line for ESP32",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/hpsaturn/esp32-wifi-cli.git"
+  },
+  "frameworks": ["espidf", "freertos", "arduino"],
+  "platforms":
+  [
+    "espressif32",
+    "espressif8266"
+  ],
+  "export": {
+    "exclude":
+    [
+        ".github",
+        ".vscode",
+        ".travis.yml",
+        ".gitignore",
+        "releases",
+        "docs",
+        "examples/*/.vscode"
+    ]
+  },
+  "authors":
+  [
+    {
+      "name": "@hpsaturn",
+      "url": "https://hpsaturn.com",
+      "maintainer": true
+    }
+  ],
+  "license": "GPL-3.0-only",
+  "dependencies":
+  [
+    {"name":"SerialTerminal", "version":"https://github.com/hpsaturn/SerialTerminal.git#fix_prompt_issues"}
+  ]
+}
