@@ -4,20 +4,42 @@
  Copyright (c) 2022, @hpsaturn, Antonio Vanegas
  https://hpsaturn.com, All rights reserved.
  https://github.com/hpsaturn/esp32-wifi-cli
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, version 3.
-
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
  *********************************************************************/
 
+/*********************************************************************
+ * Basic example of ESP32WifiCLI.
+ * 
+ * After compiling and running this sketch, you can use the WiFi CLI
+ * to connect to a WiFi network via the serial console or device monitor
+ * 
+ * Enter to the console and type ENTER, reset your device and you should 
+ * see something like the following:
+
+SerialTerm v1.1.1
+(C) 2019, MikO
+  available commands:
+        help            show detail usage information
+        setSSID         set the Wifi SSID
+        setPASW         set the WiFi password
+        connect         save and connect to WiFi network
+        list            list saved WiFi networks
+        select          select the default AP (default: last)
+        mode            set the default operation single/multi AP (slow)
+        scan            scan WiFi networks
+        status          WiFi status information
+        disconnect      WiFi disconnect
+        delete          remove saved WiFi network by SSID
+
+st>
+
+* To save and setup your first WiFi network, type:
+
+        setSSID "my-wifi-network"
+        setPASW "my-wifi-password"
+        connect
+
+* For advanced usage, you can review the advanced examples.
+ ********************************************************************/
 #include <Arduino.h>
 #include <ESP32WifiCLI.hpp>
 
