@@ -59,6 +59,7 @@ class ESP32WifiCLICallbacks {
 public:
     virtual ~ESP32WifiCLICallbacks() {};
     virtual void onWifiStatus(bool isConnected);
+    virtual void onHelpShow();
 };
 
 #if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_ESP32WIFICLI)

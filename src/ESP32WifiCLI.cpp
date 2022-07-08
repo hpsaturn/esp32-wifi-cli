@@ -27,6 +27,7 @@ void ESP32WifiCLI::printHelp() {
   Serial.println("disconnect \t\tdisconnect from the network");
   Serial.println("delete \"SSID\"\t\tremove saved network");
   Serial.println("help \t\t\tprint this help");
+  if (cb != nullptr) cb->onHelpShow();
 }
 
 void ESP32WifiCLI::scan() {
