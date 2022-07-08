@@ -22,9 +22,9 @@
 #include <ESP32WifiCLI.hpp>
 
 void setup() {
-  Serial.flush();
-  delay(100);
+  Serial.begin(115200);
   wcli.begin();
+  delay(100);
 }
 
 void loop() {
