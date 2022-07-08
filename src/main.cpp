@@ -36,8 +36,6 @@ Preferences cfg;
 String temp_ssid = "";
 String temp_pasw = "";
 
-String reconnect_mode = "last";
-
 void printWifiSettings() {
   Serial.print("\nWiFi SSID \t: [");
   Serial.println(WiFi.SSID()+"]");       //Output Network name.
@@ -90,6 +88,7 @@ void wifiLoop () {
     wifiTimeStamp = millis();
     if(WiFi.status() == WL_CONNECTED) M5.dis.fillpix(0x00ff00); // set LED to green
     else M5.dis.fillpix(0xffff00); // set LED to yellow
+    M5.dis.setBrightness(5); // set brightness to 50%
   }
 }
 
@@ -148,6 +147,10 @@ bool isSSIDSaved(String ssid) {
 
 void deleteNetwork(String opts) {
   String ssid = maschinendeck::SerialTerminal::ParseArgument(opts);
+  if (ssid.length() == 0) {
+    Serial.println("\nSSID is empty, please set a valid SSID into quotes");
+    return;
+  }
   int net = 1;
   bool dropped = false;
   cfg.begin("wifi_cli_prefs", RW_MODE);
@@ -180,7 +183,7 @@ void saveNetwork(String ssid, String pasw) {
   cfg.begin("wifi_cli_prefs", RW_MODE);
   int net = cfg.getInt("net_count", 0);
   String key = getNetKeyName(net+1);
-  Serial.printf("Saving network: [%s][%s][%s]\r\n",key.c_str(), ssid.c_str(), pasw.c_str());
+  Serial.printf("Saving network: [%s][%s]\r\n", ssid.c_str(), pasw.c_str());
   cfg.putString(String(key + "_ssid").c_str(), ssid);
   cfg.putString(String(key + "_pasw").c_str(), pasw);
   cfg.putInt("net_count", net+1);
@@ -194,13 +197,13 @@ void setSSID(String opts) {
     printHelp(opts);
   }
   else {
-    Serial.println("\nsaved ssid to   \t: " + temp_ssid);
+    Serial.println("\nset ssid to   \t: " + temp_ssid);
   }
 }
 
 void setPassword(String opts) {
   temp_pasw = maschinendeck::SerialTerminal::ParseArgument(opts);
-  Serial.println("\nsaved password to \t: " + temp_pasw);
+  Serial.println("\nset password to \t: " + temp_pasw);
 }
 
 void disconnect(String opts) {
@@ -274,14 +277,25 @@ int getDefaultAP() {
   return net;
 }
 
+String getMode() {
+  cfg.begin("wifi_cli_prefs", RO_MODE);
+  String mode = cfg.getString("mode", "single");
+  cfg.end();
+  return mode;
+}
+
 void setMode(String opts) {
   maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
   cfg.begin("wifi_cli_prefs", RW_MODE);
   if (operands.first().equals("single")) {
-    cfg.putString("mode", "last");
+    cfg.putString("mode", "single");
   } else if (operands.first().equals("multi")) {
     cfg.putString("mode", "multi");
-  } else {
+  } else if (operands.first().equals("")) {
+    Serial.printf("\nCurrent mode: %s\r\n",cfg.getString("mode", "single").c_str());
+    printHelp(opts);
+  } 
+  else {
     Serial.println("\nInvalid mode, please use single/multi parameter");
     printHelp(opts);
   }
@@ -290,12 +304,20 @@ void setMode(String opts) {
 
 void multiWiFiConnect() {
   int retry = 0;
-  Serial.print("\nConnecting...");
+  Serial.print("\nConnecting in MultiAP mode..");
   while (wifiMulti.run(connectTimeoutMs) != WL_CONNECTED && retry++< 10) {
     delay(500);
     Serial.print(".");
   } 
   wifiValidation();
+}
+
+void reconnect() {
+  if (WiFi.status() != WL_CONNECTED && getMode().equals("single")) {
+    wifiAPConnect(false);
+  } else {
+    multiWiFiConnect();
+  }
 }
 
 void connect(String opts) {
@@ -307,16 +329,19 @@ void connect(String opts) {
     disconnect(opts);
     delay(1000);
   }
-  if(temp_ssid.length() == 0) {
-    Serial.println("\nSSID is empty, please set a valid SSID into quotes\n");
-    return;
-  } 
-  if(isSSIDSaved(temp_ssid)) {
-    wifiAPConnect(false);
-    return;
-  }
-  else if(temp_ssid.length() > 0) {
-    wifiAPConnect(true); 
+  if (getMode().equals("single")) {
+    if (temp_ssid.length() == 0) {
+      Serial.println("\nSSID is empty, please set a valid SSID into quotes\n");
+      return;
+    }
+    if (isSSIDSaved(temp_ssid)) {
+      wifiAPConnect(false);
+      return;
+    } else {
+      wifiAPConnect(true);
+    }
+  } else {
+    multiWiFiConnect();
   }
 }
 
@@ -326,11 +351,10 @@ void setup() {
   WiFi.mode(WIFI_STA);
   Serial.flush();
   delay(1000);
-  Serial.println("\n\n");
+  Serial.println("\n");
   loadSavedNetworks(true);
   loadAP(getDefaultAP());
-  wifiAPConnect(false);
-  cfg.end();
+  reconnect();
   delay(100);
   term = new maschinendeck::SerialTerminal(115200);
   term->add("help", &printHelp, "\tshow detail usage information");
@@ -343,7 +367,7 @@ void setup() {
   term->add("scan", &scanNetworks, "\tscan WiFi networks");
   term->add("status", &wifiStatus, "\tWiFi status information");
   term->add("disconnect", &disconnect, "WiFi disconnect");
-  term->add("delete", &deleteNetwork, "\tremove saved WiFi network by SSID");
+  term->add("delete", &deleteNetwork, "\tremove saved WiFi network by SSID\r\n");
 }
 
 void loop() {
