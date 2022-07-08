@@ -351,7 +351,7 @@ void _setMode(String opts) {
   wcli.setMode(operands.first());
 }
 
-void ESP32WifiCLI::begin() {
+void ESP32WifiCLI::begin(long baudrate) {
   WiFi.mode(WIFI_STA);
   Serial.flush();
   delay(1000);
@@ -360,7 +360,7 @@ void ESP32WifiCLI::begin() {
   loadAP(getDefaultAP());
   reconnect();
   delay(100);
-  term = new maschinendeck::SerialTerminal(115200);
+  term = new maschinendeck::SerialTerminal(baudrate);
   term->add("help", &_printHelp, "\tshow detail usage information");
   term->add("setSSID", &_setSSID, "\tset the Wifi SSID");
   term->add("setPASW", &_setPASW, "\tset the WiFi password");

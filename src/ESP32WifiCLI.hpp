@@ -19,7 +19,7 @@ class ESP32WifiCLI {
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
 
-  void begin();
+  void begin(long baudrate = 0);
   void loop();
   void printHelp();
   void printWifiStatus();
