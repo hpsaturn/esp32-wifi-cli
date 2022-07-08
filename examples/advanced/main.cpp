@@ -19,9 +19,11 @@
  *********************************************************************/
 
 #include <ESP32WifiCLI.hpp>
-
 #define LED_BUILTIN 19
 
+/*********************************************************************
+ * Optional callback.
+ ********************************************************************/
 class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   void onWifiStatus(bool isConnected) {
     if(isConnected) {
@@ -30,8 +32,15 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
       digitalWrite(LED_BUILTIN, LOW);
     }
   }
+
+  void onHelpShow() {
+    Serial.println("\r\nYour extended help here...");
+  }
 };
 
+/*********************************************************************
+ * User defined commands. Example: suspend, blink, reboot, etc.
+ ********************************************************************/
 void gotToSuspend(int type, int seconds) {
     delay(8);  // waiting for writing msg on serial
     //esp_deep_sleep(1000000LL * DEEP_SLEEP_DURATION);
@@ -56,15 +65,35 @@ void sleep(String opts) {
   }
 }
 
+void blink(String opts) {
+  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+  int times = operands.first().toInt();
+  int miliseconds = operands.second().toInt();
+  for (int i = 0; i < times; i++) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(miliseconds);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(miliseconds);
+  }
+}
+
+void echo(String opts) {
+  String echo = maschinendeck::SerialTerminal::ParseArgument(opts);
+  Serial.println(echo);
+}
+
 void setup() {
-  Serial.begin(115200);
-  Serial.flush();
+  Serial.begin(115200); // Optional, you can init it on begin()
+  Serial.flush();       // Only for showing the message on serial
   pinMode(LED_BUILTIN, OUTPUT);
   delay(1000);
   wcli.setCallback(new mESP32WifiCLICallbacks());
-  wcli.begin();
-  // custom commands:
+  wcli.begin();         // Alternatively, you can init with begin(115200) 
+
+  // Enter your custom commands:
   wcli.term->add("sleep", &sleep, "\t<type> <time> ESP32 will enter to sleep mode");
+  wcli.term->add("echo", &echo, "\t\"message\" Echo the msg. Parameter into quotes");
+  wcli.term->add("blink", &blink, "\t<times> <millis> LED blink x times each x millis");
 }
 
 void loop() {
