@@ -22,6 +22,9 @@
 #include <M5Atom.h>
 #include <ESP32WifiCLI.hpp>
 
+/*********************************************************************
+ * Optional callback.
+ ********************************************************************/
 class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   void onWifiStatus(bool isConnected) {
     M5.dis.setBrightness(5);     // set brightness to 50%
@@ -30,7 +33,30 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
     else
       M5.dis.fillpix(0xffff00);  // set LED to yellow
   }
+  void onHelpShow() {
+    Serial.println("\r\nYour extended help here..");
+  }
 };
+
+/*********************************************************************
+ * User defined commands. Example: suspend, blink, reboot, etc.
+ ********************************************************************/
+void blink(String opts) {
+  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+  int times = operands.first().toInt();
+  int miliseconds = operands.second().toInt();
+  for (int i = 0; i < times; i++) {
+    M5.dis.fillpix(0xaaff00);  // set LED to green
+    delay(miliseconds);
+    M5.dis.fillpix(0xff0000);  // set LED to green
+    delay(miliseconds);
+  }
+}
+
+void echo(String opts) {
+  String echo = maschinendeck::SerialTerminal::ParseArgument(opts);
+  Serial.println("\r\nmsg: "+echo);
+}
 
 void setup() {
   M5.begin(true,false,true);  //Init Atom(Initialize serial port, LED)
@@ -39,6 +65,9 @@ void setup() {
   delay(1000);
   wcli.setCallback(new mESP32WifiCLICallbacks());
   wcli.begin();
+  // User custom commands:
+  wcli.term->add("blink", &blink, "\t<times> <millis> LED blink x times each x millis");
+  wcli.term->add("echo", &echo, "\t\"message\" Echo the msg. Parameter into quotes");
 }
 
 void loop() {
