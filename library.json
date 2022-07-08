@@ -11,8 +11,7 @@
     "ESP32",
     "terminal",
     "WifiCLI",
-    "ESP32WifiCLI",
-    "ESP8266"
+    "ESP32WifiCLI"
   ],
   "description":"Basic and extendible Wifi manager via serial command line for ESP32",
   "repository":
@@ -23,8 +22,7 @@
   "frameworks": ["espidf", "freertos", "arduino"],
   "platforms":
   [
-    "espressif32",
-    "espressif8266"
+    "espressif32"
   ],
   "export": {
     "exclude":
