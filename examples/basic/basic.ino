@@ -15,8 +15,8 @@
  * Enter to the console and type ENTER, reset your device and you should 
  * see something like the following:
 
-SerialTerm v1.1.1
-(C) 2019, MikO
+SerialTerm v1.1.2
+(C) 2022, MikO - Hpsaturn
   available commands:
         help            show detail usage information
         setSSID         set the Wifi SSID
