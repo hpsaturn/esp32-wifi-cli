@@ -15,7 +15,7 @@ void ESP32WifiCLI::printWifiStatus() {
 }
 
 void ESP32WifiCLI::printHelp() {
-  Serial.println("\nUsage:\n");
+  Serial.println("\nESP32WifiCLI Usage:\n");
   Serial.println("setSSID \"YOUR SSID\"\tset the SSID into quotes");
   Serial.println("setPASW \"YOUR PASW\"\tset the password into quotes");
   Serial.println("connect \t\tsave and connect to the network");
@@ -127,6 +127,7 @@ void ESP32WifiCLI::deleteNetwork(String ssid) {
       cfg.putString(String(key_drop + "_pasw").c_str(), pasw_drop);
       cfg.remove(String(key + "_ssid").c_str());
       cfg.remove(String(key + "_pasw").c_str());
+      selectAP(net - 2);
     }
   }
   cfg.end();
@@ -338,7 +339,7 @@ void _wifiStatus(String opts) {
 
 void _deleteNetwork(String opts) {
   String ssid = maschinendeck::SerialTerminal::ParseArgument(opts);
-  wcli.deleteNetwork(opts);
+  wcli.deleteNetwork(ssid);
 }
 
 void _selectAP(String opts) {
