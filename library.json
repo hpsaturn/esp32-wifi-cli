@@ -33,6 +33,7 @@
         ".gitignore",
         "releases",
         "docs",
+        "images",
         "examples/*/.vscode"
     ]
   },

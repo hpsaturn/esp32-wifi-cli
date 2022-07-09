@@ -33,8 +33,13 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
     else
       M5.dis.fillpix(0xffff00);  // set LED to yellow
   }
+
+  // Callback for extend the help menu.
   void onHelpShow() {
-    Serial.println("\r\nYour extended help here..");
+    Serial.println("\r\nCustom commands:\r\n");
+    Serial.println("blink <times> <millis>\tLED blink x times each x millis");
+    Serial.println("echo \"message\"\t\tEcho the input message");
+    Serial.println("reboot\t\t\tperform a soft ESP32 reboot");
   }
 };
 
@@ -58,6 +63,10 @@ void echo(String opts) {
   Serial.println("\r\nmsg: "+echo);
 }
 
+void reboot(String opts){
+  ESP.restart();
+}
+
 void setup() {
   M5.begin(true,false,true);  //Init Atom(Initialize serial port, LED)
   M5.dis.fillpix(0xffffff);   //Light LED with the specified RGB color. 
@@ -66,8 +75,9 @@ void setup() {
   wcli.setCallback(new mESP32WifiCLICallbacks());
   wcli.begin();
   // User custom commands:
-  wcli.term->add("blink", &blink, "\t<times> <millis> LED blink x times each x millis");
-  wcli.term->add("echo", &echo, "\t\"message\" Echo the msg. Parameter into quotes");
+  wcli.term->add("blink", &blink, "\tLED blink x times each x millis");
+  wcli.term->add("echo", &echo, "\tEcho the input message");
+  wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
 }
 
 void loop() {
