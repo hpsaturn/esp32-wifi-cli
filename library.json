@@ -47,6 +47,6 @@
   "license": "GPL-3.0-only",
   "dependencies":
   [
-    {"name":"SerialTerminal", "version":"https://github.com/hpsaturn/SerialTerminal.git#fix_prompt_issues"}
+    {"name":"SerialTerminal", "version":"https://github.com/hpsaturn/SerialTerminal.git"}
   ]
 }
