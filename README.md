@@ -4,7 +4,7 @@ Basic and extendible Wifi CLI manager via serial command line for ESP32
 
 ## Demo
 
-![ESP32 Wifi CLI Demo](images/esp32_wifi_cli_demo.gif)
+![ESP32 Wifi CLI Demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_demo.gif)
 
 ## Features
 
@@ -69,7 +69,7 @@ wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
 For more details, please review the [M5Atom](examples/M5Atom/main.cpp) and [Advanced](examples/advanced/main.cpp) examples.
 
 
-![ESP32 Wifi CLI Blink demo](images/esp32_wifi_cli_blink.gif)
+![ESP32 Wifi CLI Blink demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_blink.gif)
 
 ## PlatformIO install
 
