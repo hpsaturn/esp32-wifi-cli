@@ -199,7 +199,6 @@ bool ESP32WifiCLI::loadAP(int net) {
   cfg.begin("wifi_cli_prefs", RO_MODE);
   String key = getNetKeyName(net);
   if (!cfg.isKey(String(key + "_ssid").c_str())) {
-    Serial.println("\nNetwork not found");
     cfg.end();
     return false;
   }
@@ -211,7 +210,10 @@ bool ESP32WifiCLI::loadAP(int net) {
 }
 
 void ESP32WifiCLI::selectAP(int net) {
-  if (!loadAP(net)) return;
+  if (!loadAP(net)) {
+    Serial.println("\nNetwork not found");
+    return;
+  }
   cfg.begin("wifi_cli_prefs", RW_MODE);
   cfg.putInt("default_net", net);
   cfg.end();
