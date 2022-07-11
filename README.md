@@ -13,6 +13,7 @@ Basic and extendible Wifi CLI manager via serial command line for ESP32
 - [x] Wifi multi AP and single AP modes
 - [x] preferences persist in flash ROM
 - [x] two kind of parsers: Argument into quotes or two parameters
+- [ ] launch terminal in setup (example)
 - [ ] debug messages mode off
 - [ ] extend the CLI events callbacks
 - [ ] esp8266 support
