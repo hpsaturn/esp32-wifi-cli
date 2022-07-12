@@ -358,12 +358,12 @@ void _setMode(String opts) {
 void ESP32WifiCLI::begin(long baudrate) {
   WiFi.mode(WIFI_STA);
   Serial.flush();
-  delay(1000);
+  delay(10);
   Serial.println("\n");
   loadSavedNetworks(true);
   loadAP(getDefaultAP());
   reconnect();
-  delay(100);
+  delay(10);
   term = new maschinendeck::SerialTerminal(baudrate);
   term->add("help", &_printHelp, "\tshow detail usage information");
   term->add("setSSID", &_setSSID, "\tset the Wifi SSID");
