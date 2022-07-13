@@ -195,6 +195,10 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
   }
 }
 
+bool ESP32WifiCLI::isConfigured() {
+  return wcli.loadAP(1);
+}
+
 bool ESP32WifiCLI::loadAP(int net) {
   cfg.begin("wifi_cli_prefs", RO_MODE);
   String key = getNetKeyName(net);
@@ -202,7 +206,7 @@ bool ESP32WifiCLI::loadAP(int net) {
     cfg.end();
     return false;
   }
-  Serial.printf("\nDefault AP: %i: [%s]\r\n", net, cfg.getString(String(key + "_ssid").c_str(), "").c_str());
+  // Serial.printf("\nDefault AP: %i: [%s]\r\n", net, cfg.getString(String(key + "_ssid").c_str(), "").c_str());
   temp_ssid = cfg.getString(String(key + "_ssid").c_str(), "");
   temp_pasw = cfg.getString(String(key + "_pasw").c_str(), "");
   cfg.end();
@@ -359,7 +363,7 @@ void ESP32WifiCLI::begin(long baudrate) {
   WiFi.mode(WIFI_STA);
   Serial.flush();
   delay(10);
-  Serial.println("\n");
+  Serial.println("");
   loadSavedNetworks(true);
   loadAP(getDefaultAP());
   reconnect();

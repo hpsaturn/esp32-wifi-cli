@@ -43,6 +43,7 @@ class ESP32WifiCLI {
   void deleteNetwork(String ssid);
   void loadSavedNetworks(bool addAP = true);
   bool isSSIDSaved(String ssid);
+  bool isConfigured();
   void saveNetwork(String ssid, String pasw);
   String getMode();
   int getDefaultAP();
