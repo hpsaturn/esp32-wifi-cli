@@ -9,7 +9,7 @@ void ESP32WifiCLI::printWifiStatus() {
   Serial.println(WiFi.RSSI());  // Output signal strength.
   Serial.print("MAC Address\t: ");
   Serial.println(WiFi.macAddress());  // Output MAC address.
-  Serial.print("Hostname\t: ");
+  Serial.print("Hostname \t: ");
   Serial.println(WiFi.getHostname());  // Output hostname.
   Serial.println("");
 }
@@ -18,9 +18,9 @@ void ESP32WifiCLI::printHelp() {
   Serial.println("\nESP32WifiCLI Usage:\n");
   Serial.println("setSSID \"YOUR SSID\"\tset the SSID into quotes");
   Serial.println("setPASW \"YOUR PASW\"\tset the password into quotes");
-  Serial.println("connect \t\tsave and connect to the network");
+  Serial.println("connect  \t\tsave and connect to the network");
   Serial.println("list \t\t\tlist all saved networks");
-  Serial.println("select <number>\tselect the default AP (default: last saved)");
+  Serial.println("select <number>   \tselect the default AP (default: last saved)");
   Serial.println("mode <single/multi>\tconnection mode. Multi AP is a little slow");
   Serial.println("scan \t\t\tscan for available networks");
   Serial.println("status \t\t\tprint the current WiFi status");
