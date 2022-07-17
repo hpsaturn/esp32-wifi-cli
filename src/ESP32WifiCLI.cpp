@@ -20,8 +20,8 @@ void ESP32WifiCLI::printHelp() {
   Serial.println("setPASW \"YOUR PASW\"\tset the password into quotes");
   Serial.println("connect \t\tsave and connect to the network");
   Serial.println("list \t\t\tlist all saved networks");
-  Serial.println("select <number>\t\tselect the default AP (default: last saved)");
-  Serial.println("mode <single/multi>\tset the connection mode. Multi AP is a little slow");
+  Serial.println("select <number>\tselect the default AP (default: last saved)");
+  Serial.println("mode <single/multi>\tconnection mode. Multi AP is a little slow");
   Serial.println("scan \t\t\tscan for available networks");
   Serial.println("status \t\t\tprint the current WiFi status");
   Serial.println("disconnect \t\tdisconnect from the network");
