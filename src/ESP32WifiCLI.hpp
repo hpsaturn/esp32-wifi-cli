@@ -22,7 +22,7 @@ class ESP32WifiCLI {
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
 
-  void begin(long baudrate = 0);
+  void begin(long baudrate = 0, String app_name = "wifi_cli_prefs");
   void loop();
   void printHelp();
   void printWifiStatus();
@@ -45,12 +45,17 @@ class ESP32WifiCLI {
   bool isSSIDSaved(String ssid);
   bool isConfigured();
   void saveNetwork(String ssid, String pasw);
+  void setInt(String key, int value);
+  int32_t getInt(String key, int defaultValue);
+  void setString(String key, String value);
+  String getString(String key, String defaultValue);
   String getMode();
   int getDefaultAP();
 
   void setCallback(ESP32WifiCLICallbacks* pcb);
 
  private:
+  String app_name;
   String temp_ssid = "";
   String temp_pasw = "";
 

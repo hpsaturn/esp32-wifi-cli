@@ -20,7 +20,7 @@
 
 #include <ESP32WifiCLI.hpp>
 
-int LED_PIN = 19;
+int LED_PIN = 13;
 
 /*********************************************************************
  * Optional callback.
@@ -88,9 +88,9 @@ void setLED(String opts) {
   maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
   int pin = operands.first().toInt();
   if(pin >= 0 && pin <= 31) {
-    LED_PIN = pin;
-    pinMode(LED_PIN, OUTPUT);
+    wcli.setInt("LED_PIN", pin);
     Serial.println("\r\nLED GPIO set to " + String(pin));
+    Serial.println("Please reboot to apply the change.");
   }
   else {
     Serial.println("setLED: invalid pin number");
@@ -109,6 +109,7 @@ void reboot(String opts){
 void setup() {
   Serial.begin(115200); // Optional, you can init it on begin()
   Serial.flush();       // Only for showing the message on serial
+  LED_PIN = wcli.getInt("LED_PIN", 13);
   pinMode(LED_PIN, OUTPUT);
   delay(1000);
   wcli.setCallback(new mESP32WifiCLICallbacks());
