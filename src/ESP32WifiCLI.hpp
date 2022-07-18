@@ -21,6 +21,7 @@ class ESP32WifiCLI {
   maschinendeck::SerialTerminal* term;
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
+  bool silent = false;
 
   void begin(long baudrate = 0, String app_name = "wifi_cli_prefs");
   void loop();
@@ -49,6 +50,7 @@ class ESP32WifiCLI {
   int32_t getInt(String key, int defaultValue);
   void setString(String key, String value);
   String getString(String key, String defaultValue);
+  void setSilentMode(bool enable);
   String getMode();
   int getDefaultAP();
 
