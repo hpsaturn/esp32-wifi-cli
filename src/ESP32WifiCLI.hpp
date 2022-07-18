@@ -21,6 +21,7 @@ class ESP32WifiCLI {
   maschinendeck::SerialTerminal* term;
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
+  bool silent = false;
 
   void begin(long baudrate = 0);
   void loop();
@@ -45,6 +46,7 @@ class ESP32WifiCLI {
   bool isSSIDSaved(String ssid);
   bool isConfigured();
   void saveNetwork(String ssid, String pasw);
+  void setSilentMode(bool enable);
   String getMode();
   int getDefaultAP();
 
