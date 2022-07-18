@@ -65,17 +65,17 @@ void ESP32WifiCLI::loadSavedNetworks(bool addAP) {
   cfg.begin("wifi_cli_prefs", RO_MODE);
   int net = 1;
   int default_net = cfg.getInt("default_net", 1);
-  Serial.println("\nSaved networks:\n");
+  if (!addAP) Serial.println("\nSaved networks:\n");
   while (cfg.isKey(String(getNetKeyName(net) + "_ssid").c_str())) {
     String key = getNetKeyName(net);
     String ssid = cfg.getString(String(key + "_ssid").c_str(), "");
     String pasw = cfg.getString(String(key + "_pasw").c_str(), "");
     String dfl = (net == default_net) ? "*" : " ";
-    Serial.printf("(%s) %d: [%s]\r\n", dfl.c_str(), net, ssid.c_str());
+    if (!addAP) Serial.printf("(%s) %d: [%s]\r\n", dfl.c_str(), net, ssid.c_str());
     if (addAP) wifiMulti.addAP(ssid.c_str(), pasw.c_str());
     net++;
   }
-  Serial.println("");
+  if(!addAP)Serial.println("");
   cfg.end();
 }
 
@@ -149,7 +149,6 @@ void ESP32WifiCLI::setSSID(String ssid) {
   temp_ssid = ssid;
   if (temp_ssid.length() == 0) {
     Serial.println("\nSSID is empty, please set a valid SSID into quotes");
-    printHelp();
   } else {
     Serial.println("\nset ssid to   \t: " + temp_ssid);
   }
@@ -168,7 +167,7 @@ void ESP32WifiCLI::disconnect() {
 bool ESP32WifiCLI::wifiValidation() {
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("connected!");
-    status();
+    if(!silent) status();
     return true;
   } else {
     Serial.println("connection failed!");
@@ -196,7 +195,11 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
 }
 
 bool ESP32WifiCLI::isConfigured() {
-  return wcli.loadAP(1);
+  cfg.begin("wifi_cli_prefs", RO_MODE);
+  String key = getNetKeyName(1);
+  bool isConfigured = cfg.isKey(String(key + "_ssid").c_str());
+  cfg.end();
+  return isConfigured;
 }
 
 bool ESP32WifiCLI::loadAP(int net) {
@@ -246,10 +249,8 @@ void ESP32WifiCLI::setMode(String mode) {
     cfg.putString("mode", "multi");
   } else if (mode.equals("")) {
     Serial.printf("\nCurrent mode: %s\r\n", cfg.getString("mode", "single").c_str());
-    printHelp();
   } else {
     Serial.println("\nInvalid mode, please use single/multi parameter");
-    printHelp();
   }
   cfg.end();
 }
@@ -309,6 +310,10 @@ void ESP32WifiCLI::setCallback(ESP32WifiCLICallbacks* pcb) {
   this->cb = pcb;
 }
 
+void ESP32WifiCLI::setSilentMode(bool silent) {
+  this->silent = silent;
+}
+
 void _scanNetworks(String opts) {
   wcli.scan();
 }
@@ -364,7 +369,7 @@ void ESP32WifiCLI::begin(long baudrate) {
   Serial.flush();
   delay(10);
   Serial.println("");
-  loadSavedNetworks(true);
+  loadSavedNetworks();
   loadAP(getDefaultAP());
   reconnect();
   delay(10);
