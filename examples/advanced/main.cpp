@@ -19,7 +19,8 @@
  *********************************************************************/
 
 #include <ESP32WifiCLI.hpp>
-#define LED_BUILTIN 19
+
+int LED_PIN = 19;
 
 /*********************************************************************
  * Optional callback.
@@ -27,14 +28,20 @@
 class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   void onWifiStatus(bool isConnected) {
     if(isConnected) {
-      digitalWrite(LED_BUILTIN, HIGH);
+      digitalWrite(LED_PIN, HIGH);
     } else {
-      digitalWrite(LED_BUILTIN, LOW);
+      digitalWrite(LED_PIN, LOW);
     }
   }
 
   void onHelpShow() {
-    Serial.println("\r\nYour extended help here...");
+    // Enter your custom help here:
+    Serial.println("\r\nCustom commands:\r\n");
+    Serial.println("sleep <mode> <time> \tESP32 sleep mode (deep or light)");
+    Serial.println("echo \"message\" \t\tEcho the msg. Parameter into quotes");
+    Serial.println("setLED <PIN> \t\tconfig the LED GPIO for blink");
+    Serial.println("blink <times> <millis> \tLED blink x times each x millis");
+    Serial.println("reboot\t\t\tperform a soft ESP32 reboot");
   }
 };
 
@@ -70,10 +77,23 @@ void blink(String opts) {
   int times = operands.first().toInt();
   int miliseconds = operands.second().toInt();
   for (int i = 0; i < times; i++) {
-    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_PIN, HIGH);
     delay(miliseconds);
-    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(LED_PIN, LOW);
     delay(miliseconds);
+  }
+}
+
+void setLED(String opts) {
+  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+  int pin = operands.first().toInt();
+  if(pin >= 0 && pin <= 31) {
+    LED_PIN = pin;
+    pinMode(LED_PIN, OUTPUT);
+    Serial.println("\r\nLED GPIO set to " + String(pin));
+  }
+  else {
+    Serial.println("setLED: invalid pin number");
   }
 }
 
@@ -82,18 +102,24 @@ void echo(String opts) {
   Serial.println(echo);
 }
 
+void reboot(String opts){
+  ESP.restart();
+}
+
 void setup() {
   Serial.begin(115200); // Optional, you can init it on begin()
   Serial.flush();       // Only for showing the message on serial
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
   delay(1000);
   wcli.setCallback(new mESP32WifiCLICallbacks());
   wcli.begin();         // Alternatively, you can init with begin(115200) 
 
   // Enter your custom commands:
-  wcli.term->add("sleep", &sleep, "\t<type> <time> ESP32 will enter to sleep mode");
+  wcli.term->add("sleep", &sleep, "\t<mode> <time> ESP32 will enter to sleep mode");
   wcli.term->add("echo", &echo, "\t\"message\" Echo the msg. Parameter into quotes");
+  wcli.term->add("setLED", &setLED, "\t<PIN> config the LED GPIO for blink");
   wcli.term->add("blink", &blink, "\t<times> <millis> LED blink x times each x millis");
+  wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
 }
 
 void loop() {
