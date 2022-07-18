@@ -390,8 +390,8 @@ void _setMode(String opts) {
   wcli.setMode(operands.first());
 }
 
-void ESP32WifiCLI::begin(long baudrate, String app_name) {
-  app_name = app_name.length() == 0 ? "wifi_cli_prefs" : app_name;
+void ESP32WifiCLI::begin(long baudrate, String app) {
+  app_name = app.length() == 0 ? "wifi_cli_prefs" : app;
   WiFi.mode(WIFI_STA);
   Serial.flush();
   delay(10);
