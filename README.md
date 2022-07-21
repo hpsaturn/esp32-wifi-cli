@@ -1,3 +1,5 @@
+[![PlatformIO](https://github.com/hpsaturn/esp32-wifi-cli/workflows/PlatformIO/badge.svg)](https://github.com/hpsaturn/esp32-wifi-cli/actions/) ![ViewCount](https://views.whatilearened.today/views/github/hpsaturn/esp32-wifi-cli.svg)
+
 # esp32-wifi-cli
 
 Basic and extendible Wifi CLI manager via serial command line for ESP32

@@ -10,8 +10,8 @@
 #define RW_MODE false
 #define RO_MODE true
 
-#define ESP32WIFICLI_VERSION "0.1.3"
-#define ESP32WIFICLI_REVISION 037
+#define ESP32WIFICLI_VERSION "0.1.4"
+#define ESP32WIFICLI_REVISION 038
 
 class ESP32WifiCLICallbacks;
 
@@ -21,8 +21,9 @@ class ESP32WifiCLI {
   maschinendeck::SerialTerminal* term;
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
+  bool silent = false;
 
-  void begin(long baudrate = 0);
+  void begin(long baudrate = 0, String app_name = "wifi_cli_prefs");
   void loop();
   void printHelp();
   void printWifiStatus();
@@ -45,12 +46,18 @@ class ESP32WifiCLI {
   bool isSSIDSaved(String ssid);
   bool isConfigured();
   void saveNetwork(String ssid, String pasw);
+  void setInt(String key, int value);
+  int32_t getInt(String key, int defaultValue);
+  void setString(String key, String value);
+  String getString(String key, String defaultValue);
+  void setSilentMode(bool enable);
   String getMode();
   int getDefaultAP();
 
   void setCallback(ESP32WifiCLICallbacks* pcb);
 
  private:
+  String app_name;
   String temp_ssid = "";
   String temp_pasw = "";
 
