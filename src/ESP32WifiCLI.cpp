@@ -111,23 +111,28 @@ void ESP32WifiCLI::deleteNetwork(String ssid) {
     String key = getNetKeyName(net++);
     String ssid_ = cfg.getString(String(key + "_ssid").c_str(), "");
     if (!dropped && ssid_.equals(ssid)) {
-      Serial.printf("Deleting network %d %s\r\n", net - 1, key.c_str());
+      Serial.printf("\nDeleting network [%s][%s]\r\n", key.c_str(), ssid.c_str());
       cfg.remove(String(key + "_ssid").c_str());
       cfg.remove(String(key + "_pasw").c_str());
       dropped = true;
       int net_count = cfg.getInt("net_count", 0);
       cfg.putInt("net_count", net_count - 1);
+      int default_net = cfg.getInt("default_net", 1);
+      if (net - 1 == default_net && net_count > 1 ) cfg.putInt("default_net", net_count - 1);
       continue;
     }
     if (dropped) {
       String ssid_drop = cfg.getString(String(key + "_ssid").c_str(), "");
       String pasw_drop = cfg.getString(String(key + "_pasw").c_str(), "");
       String key_drop = getNetKeyName(net - 2);
+      // Serial.printf("ssid drop: [%s][%d][%s]\r\n",ssid_drop.c_str(), net - 2, key_drop.c_str());
       cfg.putString(String(key_drop + "_ssid").c_str(), ssid_drop);
       cfg.putString(String(key_drop + "_pasw").c_str(), pasw_drop);
+      // Serial.printf("remove key: [%d][%s]\r\n",net - 1, key.c_str());
+      int default_net = cfg.getInt("default_net", 1);
+      if (net - 1 == default_net) cfg.putInt("default_net", net - 2);
       cfg.remove(String(key + "_ssid").c_str());
       cfg.remove(String(key + "_pasw").c_str());
-      selectAP(net - 2);
     }
   }
   cfg.end();
@@ -141,7 +146,7 @@ void ESP32WifiCLI::saveNetwork(String ssid, String pasw) {
   cfg.putString(String(key + "_ssid").c_str(), ssid);
   cfg.putString(String(key + "_pasw").c_str(), pasw);
   cfg.putInt("net_count", net + 1);
-  selectAP(net + 1);
+  cfg.putInt("default_net", net + 1);
   cfg.end();
 }
 
