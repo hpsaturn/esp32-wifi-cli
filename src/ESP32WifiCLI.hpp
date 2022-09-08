@@ -10,8 +10,8 @@
 #define RW_MODE false
 #define RO_MODE true
 
-#define ESP32WIFICLI_VERSION "0.1.5"
-#define ESP32WIFICLI_REVISION 039
+#define ESP32WIFICLI_VERSION "0.1.6"
+#define ESP32WIFICLI_REVISION 040
 
 class ESP32WifiCLICallbacks;
 

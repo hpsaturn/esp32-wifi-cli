@@ -108,12 +108,14 @@ void reboot(String opts){
 
 void setup() {
   Serial.begin(115200); // Optional, you can init it on begin()
-  Serial.flush();       // Only for showing the message on serial
-  LED_PIN = wcli.getInt("LED_PIN", 13);
-  pinMode(LED_PIN, OUTPUT);
+  Serial.flush();       // Only for showing the message on serial 
   delay(1000);
   wcli.setCallback(new mESP32WifiCLICallbacks());
   wcli.begin();         // Alternatively, you can init with begin(115200) 
+
+  // Configure previously configured LED pins via CLI command
+  int LED_PIN = wcli.getInt("LED_PIN", LED_PIN);
+  pinMode(LED_PIN, OUTPUT);
 
   // Enter your custom commands:
   wcli.term->add("sleep", &sleep, "\t<mode> <time> ESP32 will enter to sleep mode");
