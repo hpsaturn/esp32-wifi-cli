@@ -88,6 +88,14 @@ This ESP32 CLI is based on the old SerialTerminal of @miko007. Please first down
 
 After that install ESP32 Wifi CLI library from this repo. Download it on [releases](https://github.com/hpsaturn/esp32-wifi-cli/releases).
 
+## Projects
+
+The next projects are using `esp32-wifi-cli` library:
+
+### Crypto panel
+
+[![Crypto panel](images/cryptopanel_preview.jpg)](https://youtu.be/oyav6SvN870)
+
 
 ## Credits
 
