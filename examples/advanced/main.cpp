@@ -20,7 +20,7 @@
 
 #include <ESP32WifiCLI.hpp>
 
-int LED_PIN = 13;
+// int LED_PIN = 13;
 
 /*********************************************************************
  * Optional callback.
@@ -28,9 +28,9 @@ int LED_PIN = 13;
 class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   void onWifiStatus(bool isConnected) {
     if(isConnected) {
-      digitalWrite(LED_PIN, HIGH);
+      // digitalWrite(LED_PIN, HIGH);
     } else {
-      digitalWrite(LED_PIN, LOW);
+      // digitalWrite(LED_PIN, LOW);
     }
   }
 
@@ -77,9 +77,9 @@ void blink(String opts) {
   int times = operands.first().toInt();
   int miliseconds = operands.second().toInt();
   for (int i = 0; i < times; i++) {
-    digitalWrite(LED_PIN, HIGH);
+    // digitalWrite(LED_PIN, HIGH);
     delay(miliseconds);
-    digitalWrite(LED_PIN, LOW);
+    // digitalWrite(LED_PIN, LOW);
     delay(miliseconds);
   }
 }
@@ -114,14 +114,14 @@ void setup() {
   wcli.begin();         // Alternatively, you can init with begin(115200) 
 
   // Configure previously configured LED pins via CLI command
-  int LED_PIN = wcli.getInt("LED_PIN", LED_PIN);
-  pinMode(LED_PIN, OUTPUT);
+  // int LED_PIN = wcli.getInt("LED_PIN", LED_PIN);
+  // pinMode(LED_PIN, OUTPUT);
 
   // Enter your custom commands:
   wcli.term->add("sleep", &sleep, "\t<mode> <time> ESP32 will enter to sleep mode");
   wcli.term->add("echo", &echo, "\t\"message\" Echo the msg. Parameter into quotes");
   wcli.term->add("setLED", &setLED, "\t<PIN> config the LED GPIO for blink");
-  wcli.term->add("blink", &blink, "\t<times> <millis> LED blink x times each x millis");
+  // wcli.term->add("blink", &blink, "\t<times> <millis> LED blink x times each x millis");
   wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
 }
 
