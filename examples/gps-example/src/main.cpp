@@ -12,7 +12,7 @@ HardwareSerial * gps;
 bool output_serial;
 
 WiFiUDP Udp;
-IPAddress udpip(192, 168, 178, 145);
+IPAddress udpip(192, 168, 178, 145); // Your PC IP address
 
 bool udp_write(uint8_t text, int port) {
   //UDP Write
@@ -42,7 +42,7 @@ static void smartDelay(unsigned long ms) {
     String out = "";
     while (gps->available()) {
       if(output_serial) Serial.write(gps->read());
-      else udp_write(gps->read(), 9000);
+      else udp_write(gps->read(), 9000);  // Your open PC port
     }
   } while (millis() - start < ms);
 }
