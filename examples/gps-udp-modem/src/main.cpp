@@ -2,17 +2,17 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <ESP32WifiCLI.hpp>
-
 #include "hal.h"
 
-static const uint32_t GPSBaud = 38400;
 // The serial connection to the GPS device
 HardwareSerial * gps;
+// GPS speed configuration (sometimes is 9600)
+static const uint32_t GPSBaud = 38400;
 
 bool output_serial;
 
 WiFiUDP Udp;
-IPAddress udpip(192, 168, 178, 145); // Your PC IP address
+IPAddress udpip(192, 168, 178, 145); // Your PC IP address. TODO: config via CLI
 
 bool udp_write(uint8_t text, int port) {
   //UDP Write
@@ -61,22 +61,27 @@ void setup() {
   Serial.flush();
   delay(1000);
 
-  pinMode(HW_EN, OUTPUT);
-  digitalWrite(HW_EN, HIGH);  // step-up on
+  pinMode(HW_EN, OUTPUT);     // optional hardware pin enable for example with a
+  digitalWrite(HW_EN, HIGH);  // step-up for enable/disable all hardware.
 
   delay(100);
 
+  // GPS initialization
   Serial2.begin(GPSBaud, SERIAL_8N1, GPS_RX, GPS_TX);
   gps = &Serial2;
   delay(100);
 
+  // WiFi CLI init and custom commands
   wcli.begin();
   wcli.term->add("output", &cli_output, "\t[on|off] GPS serial output.");
 
+  // Configuration loop:
+  // 15 seconds for reconfiguration or first use case.
+  // for reconfiguration type disconnect and switch the "output" mode
   uint32_t start = millis();
-  while (WiFi.status() != WL_CONNECTED || (millis() - start < 5000)) wcli.loop();
+  while (WiFi.status() != WL_CONNECTED || (millis() - start < 15000)) wcli.loop();
 
-  Serial.println("== end setup ==");
+  Serial.printf("\r\n== end setup ==\r\n");
 }
 
 void loop() {
