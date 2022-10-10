@@ -41,8 +41,10 @@ static void smartDelay(unsigned long ms) {
   do {
     String out = "";
     while (gps->available()) {
-      if(output_serial) Serial.write(gps->read());
-      else udp_write(gps->read(), 9000);  // Your open PC port
+      if(output_serial) Serial.write(gps->read()); // Send output via primary serial port (Direct connection)
+      else udp_write(gps->read(), 9000);  // Send output to your open PC port via UDP (Virtual serial port)
+                                          // If you want undestand more about virtual serial port:
+                                          // https://hpsaturn.com/virtual-serial-port/
     }
   } while (millis() - start < ms);
 }
@@ -73,6 +75,7 @@ void setup() {
 
   // WiFi CLI init and custom commands
   wcli.begin();
+  // adding output command. To choose the Serial2 redirection, to UDP or Serial.
   wcli.term->add("output", &cli_output, "\t[on|off] GPS serial output.");
 
   // Configuration loop:
