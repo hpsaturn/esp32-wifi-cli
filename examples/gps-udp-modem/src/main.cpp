@@ -7,7 +7,7 @@
 // The serial connection to the GPS device
 HardwareSerial * gps;
 // GPS speed configuration (sometimes is 9600)
-static const uint32_t GPSBaud = 38400;
+static const uint32_t GPSBaud = 9600;
 
 bool output_serial;
 
@@ -55,6 +55,7 @@ void cli_output(String opts) {
   if (enable.equals("on")) output_serial = true;
   else if (enable.equals("off")) output_serial = false;
   else Serial.printf("\r\nbad argument. Please use on or off\r\n");
+  Serial.printf("\rGPS output enable: %s\r", output_serial ? "on" : "off");
 }
 
 void setup() {
