@@ -96,6 +96,15 @@ The next projects are using `esp32-wifi-cli` library:
 
 [![Crypto panel](images/cryptopanel_preview.jpg)](https://youtu.be/oyav6SvN870)
 
+### GPS via Virtual UART port
+
+[![screenshot20221102_231819](https://user-images.githubusercontent.com/423856/199613436-ef607d92-e06d-44ef-8d0f-0e99e49bf481.jpg)](https://hpsaturn.com/virtual-serial-port/)
+
+### Basic T-Display S3 clock
+
+[![screenshot20221104_123225](https://user-images.githubusercontent.com/423856/199962938-66e28037-494b-4f30-b18b-c4b5f30f117f.jpg)
+](https://github.com/hpsaturn/esp32-s3-clock#readme)
+
 
 ## Credits
 
