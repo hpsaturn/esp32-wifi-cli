@@ -186,7 +186,9 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
     return;
   }
   Serial.print("\nConnecting to " + temp_ssid + "...");
-  if (save) wifiMulti.addAP(temp_ssid.c_str(), temp_pasw.c_str());
+  if (save) {
+    wifiMulti.addAP(temp_ssid.c_str(), temp_pasw.c_str());
+  }
   int retry = 0;
   WiFi.begin(temp_ssid.c_str(), temp_pasw.c_str());
   while (WiFi.status() != WL_CONNECTED && retry++ < 20) {  // M5Atom will connect automatically
@@ -196,6 +198,7 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
   delay(100);
   if (wifiValidation() && save) {
     saveNetwork(temp_ssid, temp_pasw);
+    cb->onNewWifi(temp_ssid, temp_pasw);
   }
 }
 
