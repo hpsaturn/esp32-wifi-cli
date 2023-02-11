@@ -114,6 +114,9 @@ void setup() {
   Serial.flush();       // Only for showing the message on serial 
   delay(1000);
   wcli.setCallback(new mESP32WifiCLICallbacks());
+  // wcli.disableConnectInBoot();
+  // wcli.setSilentMode(true);
+  // wcli.clearSettings();
   wcli.begin();         // Alternatively, you can init with begin(115200) 
 
   // Configure previously configured LED pins via CLI command
