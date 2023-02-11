@@ -41,6 +41,8 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
     Serial.println("echo \"message\"\t\tEcho the input message");
     Serial.println("reboot\t\t\tperform a soft ESP32 reboot");
   }
+  void onNewWifi(String ssid, String passw) {
+  }
 };
 
 /*********************************************************************

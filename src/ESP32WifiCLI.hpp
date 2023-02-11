@@ -22,6 +22,7 @@ class ESP32WifiCLI {
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
   bool silent = false;
+  bool connectInBoot = true;
 
   void begin(long baudrate = 0, String app_name = "wifi_cli_prefs");
   void loop();
@@ -51,8 +52,10 @@ class ESP32WifiCLI {
   void setString(String key, String value);
   String getString(String key, String defaultValue);
   void setSilentMode(bool enable);
+  void disableConnectInBoot();
   String getMode();
   int getDefaultAP();
+  void clearSettings();
 
   void setCallback(ESP32WifiCLICallbacks* pcb);
 

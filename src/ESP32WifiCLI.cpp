@@ -142,7 +142,7 @@ void ESP32WifiCLI::saveNetwork(String ssid, String pasw) {
   cfg.begin(app_name.c_str(), RW_MODE);
   int net = cfg.getInt("net_count", 0);
   String key = getNetKeyName(net + 1);
-  Serial.printf("Saving network: [%s][%s]\r\n", ssid.c_str(), pasw.c_str());
+  if (!silent) Serial.printf("Saving network: [%s][%s]\r\n", ssid.c_str(), pasw.c_str());
   cfg.putString(String(key + "_ssid").c_str(), ssid);
   cfg.putString(String(key + "_pasw").c_str(), pasw);
   cfg.putInt("net_count", net + 1);
@@ -198,7 +198,7 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
   delay(100);
   if (wifiValidation() && save) {
     saveNetwork(temp_ssid, temp_pasw);
-    cb->onNewWifi(temp_ssid, temp_pasw);
+    if(cb != nullptr) cb->onNewWifi(temp_ssid, temp_pasw);
   }
 }
 
@@ -344,8 +344,19 @@ String ESP32WifiCLI::getString(String key, String defaultValue) {
   return out;
 }
 
+void ESP32WifiCLI::clearSettings() {
+  cfg.begin(app_name.c_str(), RW_MODE);
+  cfg.clear();
+  cfg.end();
+  if (!silent) Serial.println("Settings cleared!");
+}
+
 void ESP32WifiCLI::setSilentMode(bool silent) {
   this->silent = silent;
+}
+
+void ESP32WifiCLI::disableConnectInBoot(){
+  this->connectInBoot = false;
 }
 
 void _scanNetworks(String opts) {
@@ -406,8 +417,10 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
   Serial.println("");
   loadSavedNetworks();
   loadAP(getDefaultAP());
-  reconnect();
-  delay(10);
+  if (connectInBoot) {
+    reconnect();
+    delay(10);
+  }
   term = new maschinendeck::SerialTerminal(baudrate);
   term->add("help", &_printHelp, "\tshow detail usage information");
   term->add("setSSID", &_setSSID, "\tset the Wifi SSID");
