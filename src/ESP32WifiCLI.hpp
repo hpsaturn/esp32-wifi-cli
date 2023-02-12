@@ -10,8 +10,8 @@
 #define RW_MODE false
 #define RO_MODE true
 
-#define ESP32WIFICLI_VERSION "0.1.6"
-#define ESP32WIFICLI_REVISION 040
+#define ESP32WIFICLI_VERSION "0.2.0"
+#define ESP32WIFICLI_REVISION 041
 
 class ESP32WifiCLICallbacks;
 
@@ -22,6 +22,7 @@ class ESP32WifiCLI {
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
   bool silent = false;
+  bool connectInBoot = true;
 
   void begin(long baudrate = 0, String app_name = "wifi_cli_prefs");
   void loop();
@@ -51,8 +52,10 @@ class ESP32WifiCLI {
   void setString(String key, String value);
   String getString(String key, String defaultValue);
   void setSilentMode(bool enable);
+  void disableConnectInBoot();
   String getMode();
   int getDefaultAP();
+  void clearSettings();
 
   void setCallback(ESP32WifiCLICallbacks* pcb);
 
@@ -71,6 +74,7 @@ public:
     virtual ~ESP32WifiCLICallbacks() {};
     virtual void onWifiStatus(bool isConnected);
     virtual void onHelpShow();
+    virtual void onNewWifi(String ssid, String passw);
 };
 
 #if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_ESP32WIFICLI)

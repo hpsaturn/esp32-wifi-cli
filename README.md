@@ -105,6 +105,9 @@ The next projects are using `esp32-wifi-cli` library:
 [![screenshot20221104_123225](https://user-images.githubusercontent.com/423856/199962938-66e28037-494b-4f30-b18b-c4b5f30f117f.jpg)
 ](https://github.com/hpsaturn/esp32-s3-clock#readme)
 
+### CanAirIO - Air quality network
+
+![CanAirIO Community](https://raw.githubusercontent.com/kike-canaries/canairio_firmware/master/images/canairio_collage_community.jpg)
 
 ## Credits
 

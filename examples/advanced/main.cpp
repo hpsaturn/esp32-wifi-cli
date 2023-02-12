@@ -43,6 +43,9 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
     Serial.println("blink <times> <millis> \tLED blink x times each x millis");
     Serial.println("reboot\t\t\tperform a soft ESP32 reboot");
   }
+
+  void onNewWifi(String ssid, String passw) {
+  }
 };
 
 /*********************************************************************
@@ -111,6 +114,9 @@ void setup() {
   Serial.flush();       // Only for showing the message on serial 
   delay(1000);
   wcli.setCallback(new mESP32WifiCLICallbacks());
+  // wcli.disableConnectInBoot();
+  // wcli.setSilentMode(true);
+  // wcli.clearSettings(); // Clear all networks and settings
   wcli.begin();         // Alternatively, you can init with begin(115200) 
 
   // Configure previously configured LED pins via CLI command
