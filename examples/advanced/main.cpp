@@ -116,7 +116,7 @@ void setup() {
   wcli.setCallback(new mESP32WifiCLICallbacks());
   // wcli.disableConnectInBoot();
   // wcli.setSilentMode(true);
-  // wcli.clearSettings();
+  // wcli.clearSettings(); // Clear all networks and settings
   wcli.begin();         // Alternatively, you can init with begin(115200) 
 
   // Configure previously configured LED pins via CLI command
