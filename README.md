@@ -20,7 +20,8 @@ Basic and extendible Wifi CLI manager via serial command line for ESP32
 - [x] extend the CLI events callbacks (see examples)
 - [x] esp8266 support
 - [x] esp32c3, esp32s3 support
-- [ ] launch terminal in setup (example)
+- [x] launch terminal in setup (example)
+- [ ] improve VT100 compatibility (some minor issues on some terminals)
 
 ## Basic implementation
 
