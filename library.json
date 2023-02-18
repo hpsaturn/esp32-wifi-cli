@@ -1,6 +1,6 @@
 {
   "name": "ESP32 Wifi CLI",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage":"https://github.com/hpsaturn/esp32-wifi-cli#readme",
   "keywords": 
   [ 
@@ -9,6 +9,7 @@
     "basic",
     "Wifi",
     "ESP32",
+    "ESP32-C3",
     "terminal",
     "WifiCLI",
     "ESP32WifiCLI"
