@@ -21,106 +21,19 @@
 #include <ESP32WifiCLI.hpp>
 #include <ESPmDNS.h>
 
-int LED_PIN = 13;
-
 /*********************************************************************
- * Optional callback.
+ * User defined commands
  ********************************************************************/
-class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
-  void onWifiStatus(bool isConnected) {
-    if(isConnected) {
-      digitalWrite(LED_PIN, HIGH);
-    } else {
-      digitalWrite(LED_PIN, LOW);
-    }
-  }
-
-  void onHelpShow() {
-    // Enter your custom help here:
-    Serial.println("\r\nCustom commands:\r\n");
-    Serial.println("sleep <mode> <time> \tESP32 sleep mode (deep or light)");
-    Serial.println("echo \"message\" \t\tEcho the msg. Parameter into quotes");
-    Serial.println("setLED <PIN> \t\tconfig the LED GPIO for blink");
-    Serial.println("blink <times> <millis> \tLED blink x times each x millis");
-    Serial.println("hostname <hostname> \tset hostname into quotes");
-    Serial.println("getIp <hostname> \tget IP address of hostname into quotes");
-    Serial.println("reboot\t\t\tperform a soft ESP32 reboot");
-  }
-
-  void onNewWifi(String ssid, String passw) {
-  }
-};
-
-/*********************************************************************
- * User defined commands. Example: suspend, blink, reboot, etc.
- ********************************************************************/
-void gotToSuspend(int type, int seconds) {
-    delay(8);  // waiting for writing msg on serial
-    //esp_deep_sleep(1000000LL * DEEP_SLEEP_DURATION);
-    esp_sleep_enable_timer_wakeup(1000000LL * seconds);
-    if (type == 0) esp_deep_sleep_start();
-    else esp_light_sleep_start(); 
-}
-
-void sleep(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
-  int seconds = operands.second().toInt();
-  if(operands.first().equals("deep")) {
-    Serial.println("\ndeep suspending..");
-    gotToSuspend(0, seconds);
-  }
-  else if(operands.first().equals("light")) {
-    Serial.println("\nlight suspending..");
-    gotToSuspend(1, seconds);
-  }
-  else {
-    Serial.println("sleep: invalid option");
-  }
-}
-
-void blink(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
-  int times = operands.first().toInt();
-  int miliseconds = operands.second().toInt();
-  for (int i = 0; i < times; i++) {
-    digitalWrite(LED_PIN, HIGH);
-    delay(miliseconds);
-    digitalWrite(LED_PIN, LOW);
-    delay(miliseconds);
-  }
-}
-
-void setLED(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
-  int pin = operands.first().toInt();
-  if(pin >= 0 && pin <= 31) {
-    wcli.setInt("LED_PIN", pin);
-    Serial.println("\r\nLED GPIO set to " + String(pin));
-    Serial.println("Please reboot to apply the change.");
-  }
-  else {
-    Serial.println("setLED: invalid pin number");
-  }
-}
-
-void echo(String opts) {
-  String echo = maschinendeck::SerialTerminal::ParseArgument(opts);
-  Serial.println(echo);
-}
-
-void reboot(String opts){
-  ESP.restart();
-}
 
 void setHostname(String opts) {
   String host = maschinendeck::SerialTerminal::ParseArgument(opts);
   Serial.println(WiFi.localIP());
  
-  while(!MDNS.begin(host.c_str())) {
+  int attemp = 0;
+  while(!MDNS.begin(host.c_str()) && attemp++ < 3) {
      Serial.println("Starting mDNS...");
      delay(1000);
   }
- 
   Serial.println("MDNS started"); 
 }
 
@@ -143,9 +56,6 @@ void getIpAddress(String opts) {
     delay(250);
     serverIp = MDNS.queryHost(host.c_str(),3000);
   }
-
-  attemp = 0;
-
   if (serverIp.toString() != "0.0.0.0") {
     Serial.println("Host address resolved:");
     Serial.println(serverIp.toString());
@@ -153,28 +63,22 @@ void getIpAddress(String opts) {
   else {
     Serial.println("Host was not found!");
   }
-  
+}
+
+void reboot(String opts){
+  ESP.restart();
 }
 
 void setup() {
   Serial.begin(115200); // Optional, you can init it on begin()
   Serial.flush();       // Only for showing the message on serial 
   delay(1000);
-  wcli.setCallback(new mESP32WifiCLICallbacks());
   // wcli.disableConnectInBoot();
   // wcli.setSilentMode(true);
   // wcli.clearSettings(); // Clear all networks and settings
   wcli.begin();         // Alternatively, you can init with begin(115200) 
 
-  // Configure previously configured LED pins via CLI command
-  int LED_PIN = wcli.getInt("LED_PIN", LED_PIN);
-  pinMode(LED_PIN, OUTPUT);
-
   // Enter your custom commands:
-  wcli.term->add("sleep", &sleep, "\t<mode> <time> ESP32 will enter to sleep mode");
-  wcli.term->add("echo", &echo, "\t\"message\" Echo the msg. Parameter into quotes");
-  wcli.term->add("setLED", &setLED, "\t<PIN> config the LED GPIO for blink");
-  wcli.term->add("blink", &blink, "\t<times> <millis> LED blink x times each x millis");
   wcli.term->add("host", &setHostname, "\t<hostname> set hostname into quotes");
   wcli.term->add("getIp", &getIpAddress, "\t<hostname> get IP address of hostname into quotes");
   wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
