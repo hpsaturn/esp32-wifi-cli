@@ -74,14 +74,13 @@ wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
 
 For more details, please review the [M5Atom](examples/M5Atom/main.cpp) and [Advanced](examples/advanced/main.cpp) examples.
 
-
 ![ESP32 Wifi CLI Blink demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_blink.gif)
 
 ## PlatformIO install
 
 You able to install this library with pio pkg command:
 
-`pio pkg install --library "hpsaturn/ESP32 Wifi CLI@^0.1.0"`
+`pio pkg install --library "hpsaturn/ESP32 Wifi CLI @^0.2.1"`
 
 Or add it in your ini file. Also you can compile here the examples with a simple `pio run` over root of this repo.
 
@@ -97,7 +96,7 @@ The next projects are using `esp32-wifi-cli` library:
 
 ### Crypto panel
 
-[![Crypto panel](images/cryptopanel_preview.jpg)](https://youtu.be/oyav6SvN870)
+[![Crypto panel](https://user-images.githubusercontent.com/423856/219856278-1b3013fd-0a04-4464-8947-5a3cb874c843.jpg)](https://youtu.be/oyav6SvN870)
 
 ### GPS via Virtual UART port
 
