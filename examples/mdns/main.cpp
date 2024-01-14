@@ -42,6 +42,7 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
     Serial.println("echo \"message\" \t\tEcho the msg. Parameter into quotes");
     Serial.println("setLED <PIN> \t\tconfig the LED GPIO for blink");
     Serial.println("blink <times> <millis> \tLED blink x times each x millis");
+    Serial.println("hostname <hostname> \tset hostname into quotes");
     Serial.println("getIp <hostname> \tget IP address of hostname into quotes");
     Serial.println("reboot\t\t\tperform a soft ESP32 reboot");
   }
@@ -111,6 +112,18 @@ void reboot(String opts){
   ESP.restart();
 }
 
+void setHostname(String opts) {
+  String host = maschinendeck::SerialTerminal::ParseArgument(opts);
+  Serial.println(WiFi.localIP());
+ 
+  while(!MDNS.begin(host.c_str())) {
+     Serial.println("Starting mDNS...");
+     delay(1000);
+  }
+ 
+  Serial.println("MDNS started"); 
+}
+
 void getIpAddress(String opts) {
   String host = maschinendeck::SerialTerminal::ParseArgument(opts);
   Serial.printf("Resolving hostname: %s\r\n",host.c_str());
@@ -123,15 +136,24 @@ void getIpAddress(String opts) {
   Serial.println("MDNS started");
  
   IPAddress serverIp;
+  int attemp = 0;
  
-  while (serverIp.toString() == "0.0.0.0") {
+  while (serverIp.toString() == "0.0.0.0" && attemp++ < 5) {
     Serial.println("Resolving host...");
     delay(250);
     serverIp = MDNS.queryHost(host.c_str(),3000);
   }
- 
-  Serial.println("Host address resolved:");
-  Serial.println(serverIp.toString());
+
+  attemp = 0;
+
+  if (serverIp.toString() != "0.0.0.0") {
+    Serial.println("Host address resolved:");
+    Serial.println(serverIp.toString());
+  }
+  else {
+    Serial.println("Host was not found!");
+  }
+  
 }
 
 void setup() {
@@ -153,6 +175,7 @@ void setup() {
   wcli.term->add("echo", &echo, "\t\"message\" Echo the msg. Parameter into quotes");
   wcli.term->add("setLED", &setLED, "\t<PIN> config the LED GPIO for blink");
   wcli.term->add("blink", &blink, "\t<times> <millis> LED blink x times each x millis");
+  wcli.term->add("host", &setHostname, "\t<hostname> set hostname into quotes");
   wcli.term->add("getIp", &getIpAddress, "\t<hostname> get IP address of hostname into quotes");
   wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
 }
