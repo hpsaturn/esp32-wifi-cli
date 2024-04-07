@@ -104,7 +104,7 @@ The next projects are using `esp32-wifi-cli` library:
 
 ### Basic T-Display S3 clock
 
-[![screenshot20221104_123225](https://user-images.githubusercontent.com/423856/199962938-66e28037-494b-4f30-b18b-c4b5f30f117f.jpg)
+[![ESP32S3 Clock T-Display](https://raw.githubusercontent.com/hpsaturn/esp32-s3-clock/master/pics/preview.jpg)
 ](https://github.com/hpsaturn/esp32-s3-clock#readme)
 
 ### CanAirIO - Air quality network
