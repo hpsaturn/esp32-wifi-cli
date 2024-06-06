@@ -38,7 +38,6 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   }
 
   void onHelpShow() {
-    
   }
 
   void onNewWifi(String ssid, String passw) {
@@ -103,6 +102,7 @@ void echo(char *args, Stream *response) {
 }
 
 void reboot(char *args, Stream *response){
+  wcli.shell->clear();
   ESP.restart();
 }
 
@@ -130,27 +130,12 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
 
   // Enter your custom commands:
-  wcli.add("sleep", &sleep,     "\t<mode> <time> ESP32 will enter to sleep mode");
-  wcli.add("echo", &echo,       "\t\"message\" Echo the msg. Parameter into quotes");
-  wcli.add("setLED", &setLED,   "\t<PIN> config the LED GPIO for blink");
+  wcli.add("sleep", &sleep,     "\t\t<mode> <time> ESP32 sleep mode (deep/light)\r\n");
+  wcli.add("echo", &echo,       "\t\t\"message\" Echo the msg. Parameter into quotes");
+  wcli.add("setled", &setLED,   "\t<PIN> config the LED GPIO for blink");
   wcli.add("blink", &blink,     "\t\t<times> <millis> LED blink x times each x millis");
   wcli.add("reboot", &reboot,   "\tperform a ESP32 reboot");
-  // setup mode commands:
-  wcli.add("exit", &wcli_exit,  "\texit of the setup mode. AUTO EXIT in 10 seg! :)");
-  wcli.add("setup", &wcli_setup,"\tTYPE THIS WORD to start to configure the device :D\n");
-  
-  wcli.begin();              // Alternatively, you can init with begin(115200)
-
-  // Configuration loop in setup:
-  // 10 seconds for reconfiguration (first use case or fail-safe mode for example)
-  uint32_t start = millis();
-  while (setup_mode || (millis() - start < setup_time)) wcli.loop();
-  Serial.println();
-
-  if (setup_time == 0)
-    Serial.println("==>[INFO] Settings mode end. Booting..\r\n");
-  else
-    Serial.println("==>[INFO] Time for initial setup over. Booting..\r\n");
+  wcli.begin();  // Alternatively, you can init with begin(115200,appname)
 }
 
 void loop() {

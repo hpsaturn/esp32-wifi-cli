@@ -1,20 +1,20 @@
 #include <ESP32WifiCLI.hpp>
 
-Shellminator shell( &Serial );
-
+Shellminator shell_( &Serial );
 
 void ESP32WifiCLI::printWifiStatus() {
   Serial.print("\nWiFi SSID \t: [");
   Serial.println(WiFi.SSID() + "]");  // Output Network name.
   Serial.print("IP address  \t: ");
-  Serial.println(WiFi.localIP());  // Output IP Address.
+  Serial.println(WiFi.localIP());     // Output IP Address.
   Serial.print("RSSI signal \t: ");
-  Serial.println(WiFi.RSSI());  // Output signal strength.
+  Serial.println(WiFi.RSSI());        // Output signal strength.
   Serial.print("MAC Address\t: ");
   Serial.println(WiFi.macAddress());  // Output MAC address.
   Serial.print("Hostname \t: ");
-  Serial.println(WiFi.getHostname());  // Output hostname.
-  Serial.println("");
+  Serial.println(WiFi.getHostname()); // Output hostname.
+  Serial.print("Memory free\t: ");
+  Serial.println(String(ESP.getFreeHeap() / 1024) + "Kb");
 }
 
 void ESP32WifiCLI::printHelp() {
@@ -49,13 +49,7 @@ void ESP32WifiCLI::scan() {
   }
 }
 
-void ESP32WifiCLI::status() {
-  if (WiFi.status() == WL_CONNECTED) {
-    printWifiStatus();
-  } else {
-    Serial.println("\nWiFi is not connected");
-  }
-}
+void ESP32WifiCLI::status() { printWifiStatus(); }
 
 String ESP32WifiCLI::getNetKeyName(int net) {
   if (net > 99) return "";
@@ -427,6 +421,20 @@ String ESP32WifiCLI::parseArgument(String args){
   return ParseArgument(args);
 }
 
+const char logo[] =
+"\r\n"
+"=============================\r\n"
+"                             \r\n"
+"██     ██  ██████ ██      ██ \r\n"
+"██     ██ ██      ██      ██ \r\n"
+"██  █  ██ ██      ██      ██ \r\n"
+"██ ███ ██ ██      ██      ██ \r\n"
+" ███ ███   ██████ ███████ ██ \r\n"
+"                             \r\n"
+"=============================\r\n"
+"\r\n"
+;
+
 void ESP32WifiCLI::begin(long baudrate, String app) {
   app_name = app.length() == 0 ? "wifi_cli_prefs" : app;
   WiFi.mode(WIFI_STA);
@@ -439,50 +447,35 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
     reconnect();
     delay(10);
   }
-  wcli.add("help", &_printHelp, "\tshow detail usage information");
-  wcli.add("setSSID", &_setSSID, "\tset the Wifi SSID");
-  wcli.add("setPASW", &_setPASW, "\tset the WiFi password");
-  wcli.add("connect", &_connect, "\tsave and connect to WiFi network");
-  wcli.add("list", &_listNetworks, "\tlist saved WiFi networks");
-  wcli.add("select", &_selectAP, "\tselect the default AP (default: last)");
-  wcli.add("mode", &_setMode, "\tset the default operation single/multi AP (slow)");
-  wcli.add("scan", &_scanNetworks, "\tscan WiFi networks");
-  wcli.add("status", &_wifiStatus, "\tWiFi status information");
-  wcli.add("disconnect", &_disconnect, "WiFi disconnect");
-  wcli.add("delete", &_deleteNetwork, "\tremove saved WiFi network by SSID\r\n");
+  // wcli.add("help", &_printHelp, "\tshow detail usage information");
+  wcli.add("wssid", &_setSSID, "\t\tset the Wifi SSID");
+  wcli.add("wpassw", &_setPASW, "\tset the WiFi password");
+  wcli.add("wconnect", &_connect, "\tsave WiFi ssid & passw and connect");
+  wcli.add("wlist", &_listNetworks, "\t\tlist saved WiFi networks");
+  wcli.add("wselect", &_selectAP, "\tselect the default AP (default: last)");
+  wcli.add("wmode", &_setMode, "\t\tset the default operation single/multi AP (slow)");
+  wcli.add("wscan", &_scanNetworks, "\t\tscan WiFi networks");
+  wcli.add("wstatus", &_wifiStatus, "\tWiFi status information");
+  wcli.add("wdisconnect", &_disconnect, "\tWiFi disconnect");
+  wcli.add("wdelete", &_deleteNetwork, "\tremove saved WiFi network by SSID\r\n");
 
+  for (int i = this->size_ - 1; i < WCLI_MAX_CMDS; i++) {
+    API_tree[i] = Commander::API_t{0, NULL, NULL, "", "", NULL};
+  }
 
-  shell.clear();
-
-  // Attach the logo.
-  //shell.attachLogo( logo );
-
-  // Print start message
-  //Serial.println( "Program begin..." );
-
-  // There is an option to attach a debug channel to Commander.
-  // It can be handy to find any problems during the initialization
-  // phase. In this example we will use Serial for this.
+  this->shell = &shell_;
+  shell->clear();
+  shell->attachLogo(logo);
   commander.attachDebugChannel( &Serial );
-
-  // At start, Commander does not know anything about our commands.
-  // We have to attach the API_tree array from the previous steps
-  // to Commander to work properly.
   commander.attachTreeFunction(API_tree,sizeof(API_tree)/sizeof(API_tree[0]));
-
-  // Initialize Commander.
   commander.init();
 
-  shell.attachCommander( &commander );
-
-  // Initialize shell object.
-  shell.begin( "wcli" );
-
-
+  shell->attachCommander( &commander );
+  shell->begin( "wcli" );
 }
 
 void ESP32WifiCLI::loop() {
-  shell.update();
+  shell->update();
   static uint_least64_t wifiTimeStamp = 0;
   if (millis() - wifiTimeStamp > 1000) {
     wifiTimeStamp = millis();

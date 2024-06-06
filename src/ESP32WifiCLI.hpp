@@ -19,7 +19,7 @@
 #define ESP32WIFICLI_REVISION 044
 
 #ifndef WCLI_MAX_CMDS
-#define WCLI_MAX_CMDS 18
+#define WCLI_MAX_CMDS 20
 #endif
 
 
@@ -30,6 +30,7 @@ class ESP32WifiCLI {
   Commander::API_t API_tree[WCLI_MAX_CMDS];
   Preferences cfg;
   Commander commander;
+  Shellminator* shell;
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
   bool silent = false;
