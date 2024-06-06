@@ -38,13 +38,7 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   }
 
   void onHelpShow() {
-    // Enter your custom help here:
-    Serial.println("\r\nCustom commands:\r\n");
-    Serial.println("sleep <mode> <time> \tESP32 sleep mode (deep or light)");
-    Serial.println("echo \"message\" \t\tEcho the msg. Parameter into quotes");
-    Serial.println("setLED <PIN> \t\tconfig the LED GPIO for blink");
-    Serial.println("blink <times> <millis> \tLED blink x times each x millis");
-    Serial.println("reboot\t\t\tperform a soft ESP32 reboot");
+    
   }
 
   void onNewWifi(String ssid, String passw) {
@@ -139,7 +133,7 @@ void setup() {
   wcli.add("sleep", &sleep,     "\t<mode> <time> ESP32 will enter to sleep mode");
   wcli.add("echo", &echo,       "\t\"message\" Echo the msg. Parameter into quotes");
   wcli.add("setLED", &setLED,   "\t<PIN> config the LED GPIO for blink");
-  wcli.add("blink", &blink,     "\t<times> <millis> LED blink x times each x millis");
+  wcli.add("blink", &blink,     "\t\t<times> <millis> LED blink x times each x millis");
   wcli.add("reboot", &reboot,   "\tperform a ESP32 reboot");
   // setup mode commands:
   wcli.add("exit", &wcli_exit,  "\texit of the setup mode. AUTO EXIT in 10 seg! :)");

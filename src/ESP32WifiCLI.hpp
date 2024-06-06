@@ -19,24 +19,15 @@
 #define ESP32WIFICLI_REVISION 044
 
 #ifndef WCLI_MAX_CMDS
-#define WCLI_MAX_CMDS 64
+#define WCLI_MAX_CMDS 18
 #endif
 
-
-struct Command {
-  const char *cmd;
-  void (*callback)(char *args, Stream* response);
-  const char *desc;
-
-  Command(const char* cmd, void (*callback)(char *args, Stream *response), const char* desc)
-      : cmd(cmd), callback(callback), desc(desc) {}
-};
 
 class ESP32WifiCLICallbacks;
 
 class ESP32WifiCLI {
  public:
-  Command* commands[WCLI_MAX_CMDS];
+  Commander::API_t API_tree[WCLI_MAX_CMDS];
   Preferences cfg;
   Commander commander;
   WiFiMulti wifiMulti;
@@ -45,7 +36,7 @@ class ESP32WifiCLI {
   bool connectInBoot = true;
 
   void begin(long baudrate = 0, String app_name = "wifi_cli_prefs");
-  void add(String command, void(*callback)(char *args, Stream *response), String description = "");
+  void add(const char* command, void(*callback)(char *args, Stream *response), const char* description = "");
   Pair <String,String> parseCommand(String args);
   String parseArgument(String args);
   void loop();

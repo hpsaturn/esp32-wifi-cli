@@ -408,9 +408,14 @@ void _setMode(char *args, Stream *response) {
   wcli.setMode(operands.first());
 }
 
-void ESP32WifiCLI::add(String command, void (*callback)(char *args, Stream *response), String description) {
+void ESP32WifiCLI::add(const char* command, void (*callback)(char *args, Stream *response), const char* description) {
   if (this->size_ >= WCLI_MAX_CMDS) return;
-  this->commands[this->size_] = new Command(command.c_str(), callback, description.c_str());
+  API_tree[this->size_] = Commander::API_t{0,
+                                   NULL,
+                                   NULL,
+                                   command,
+                                   description,
+                                   callback};
   this->size_++;
 }
 
@@ -446,16 +451,6 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
   wcli.add("disconnect", &_disconnect, "WiFi disconnect");
   wcli.add("delete", &_deleteNetwork, "\tremove saved WiFi network by SSID\r\n");
 
-  Commander::API_t API_tree[size_];
-
-  for (int i = 0; i < size_; i++) {
-    API_tree[i] = Commander::API_t{0,
-                                   NULL,
-                                   NULL,
-                                   this->commands[i]->cmd,
-                                   this->commands[i]->desc,
-                                   this->commands[i]->callback};
-  }
 
   shell.clear();
 
@@ -473,7 +468,7 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
   // At start, Commander does not know anything about our commands.
   // We have to attach the API_tree array from the previous steps
   // to Commander to work properly.
-  commander.attachTree( API_tree );
+  commander.attachTreeFunction(API_tree,sizeof(API_tree)/sizeof(API_tree[0]));
 
   // Initialize Commander.
   commander.init();
@@ -481,7 +476,7 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
   shell.attachCommander( &commander );
 
   // Initialize shell object.
-  shell.begin( "arnold" );
+  shell.begin( "wcli" );
 
 
 }
