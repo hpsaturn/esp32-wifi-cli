@@ -5,26 +5,49 @@
 #include <WiFi.h>
 #include <WiFiMulti.h>
 
-#include <SerialTerminal.hpp>
+#include <Shellminator.hpp>
+#include <Shellminator-IO.hpp>
+#include <Commander-API.hpp>
+#include <Commander-IO.hpp>
+
+#include <parser_arguments.h>
 
 #define RW_MODE false
 #define RO_MODE true
 
-#define ESP32WIFICLI_VERSION "0.2.2"
-#define ESP32WIFICLI_REVISION 043
+#define ESP32WIFICLI_VERSION "0.3.0"
+#define ESP32WIFICLI_REVISION 044
+
+#ifndef WCLI_MAX_CMDS
+#define WCLI_MAX_CMDS 64
+#endif
+
+
+struct Command {
+  const char *cmd;
+  void (*callback)(char *args, Stream* response);
+  const char *desc;
+
+  Command(const char* cmd, void (*callback)(char *args, Stream *response), const char* desc)
+      : cmd(cmd), callback(callback), desc(desc) {}
+};
 
 class ESP32WifiCLICallbacks;
 
 class ESP32WifiCLI {
  public:
+  Command* commands[WCLI_MAX_CMDS];
   Preferences cfg;
-  maschinendeck::SerialTerminal* term;
+  Commander commander;
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
   bool silent = false;
   bool connectInBoot = true;
 
   void begin(long baudrate = 0, String app_name = "wifi_cli_prefs");
+  void add(String command, void(*callback)(char *args, Stream *response), String description = "");
+  Pair <String,String> parseCommand(String args);
+  String parseArgument(String args);
   void loop();
   void printHelp();
   void printWifiStatus();
@@ -63,6 +86,7 @@ class ESP32WifiCLI {
   String app_name;
   String temp_ssid = "";
   String temp_pasw = "";
+  int size_;
 
   String getNetKeyName(int net);
 

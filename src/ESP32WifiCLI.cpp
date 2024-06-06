@@ -1,5 +1,8 @@
 #include <ESP32WifiCLI.hpp>
 
+Shellminator shell( &Serial );
+
+
 void ESP32WifiCLI::printWifiStatus() {
   Serial.print("\nWiFi SSID \t: [");
   Serial.println(WiFi.SSID() + "]");  // Output Network name.
@@ -310,15 +313,6 @@ void ESP32WifiCLI::connect() {
   }
 }
 
-void ESP32WifiCLI::loop() {
-  term->loop();
-  static uint_least64_t wifiTimeStamp = 0;
-  if (millis() - wifiTimeStamp > 1000) {
-    wifiTimeStamp = millis();
-    if(cb != nullptr) cb->onWifiStatus(WiFi.status() == WL_CONNECTED); 
-  }
-}
-
 void ESP32WifiCLI::setCallback(ESP32WifiCLICallbacks* pcb) {
   this->cb = pcb;
 }
@@ -364,54 +358,68 @@ void ESP32WifiCLI::disableConnectInBoot(){
   this->connectInBoot = false;
 }
 
-void _scanNetworks(String opts) {
+void _scanNetworks(char *args, Stream *response) {
   wcli.scan();
 }
 
-void _printHelp(String opts) {
+void _printHelp(char* args, Stream *response) {
   wcli.printHelp();
 }
 
-void _setSSID(String opts) {
-  String ssid = maschinendeck::SerialTerminal::ParseArgument(opts);
+void _setSSID(char *args, Stream *response) {
+  String ssid = ParseArgument(args);
   wcli.setSSID(ssid);
 }
 
-void _setPASW(String opts) {
-  String pasw = maschinendeck::SerialTerminal::ParseArgument(opts);
+void _setPASW(char *args, Stream *response) {
+  String pasw = ParseArgument(args);
   wcli.setPASW(pasw);
 }
 
-void _connect(String opts) {
+void _connect(char *args, Stream *response) {
   wcli.connect();
 }
 
-void _disconnect(String opts) {
+void _disconnect(char *args, Stream *response) {
   wcli.disconnect();
 }
 
-void _listNetworks(String opts) {
+void _listNetworks(char *args, Stream *response) {
   wcli.loadSavedNetworks(false);
 }
 
-void _wifiStatus(String opts) {
+void _wifiStatus(char *args, Stream *response) {
   wcli.status();
 }
 
-void _deleteNetwork(String opts) {
-  String ssid = maschinendeck::SerialTerminal::ParseArgument(opts);
+void _deleteNetwork(char *args, Stream *response) {
+  String ssid = ParseArgument(args);
   wcli.deleteNetwork(ssid);
 }
 
-void _selectAP(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void _selectAP(char *args, Stream *response) {
+  Pair<String, String> operands = ParseCommand(args);
   int net = operands.first().toInt();
   wcli.selectAP(net);
 }
 
-void _setMode(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void _setMode(char *args, Stream *response) {
+  Pair<String, String> operands = ParseCommand(args);
   wcli.setMode(operands.first());
+}
+
+void ESP32WifiCLI::add(String command, void (*callback)(char *args, Stream *response), String description) {
+  if (this->size_ >= WCLI_MAX_CMDS) return;
+  this->commands[this->size_] = new Command(command.c_str(), callback, description.c_str());
+  this->size_++;
+}
+
+Pair <String,String> ESP32WifiCLI::parseCommand(String args){
+  return ParseCommand(args);
+}
+
+String ESP32WifiCLI::parseArgument(String args){
+  return ParseArgument(args);
 }
 
 void ESP32WifiCLI::begin(long baudrate, String app) {
@@ -426,18 +434,65 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
     reconnect();
     delay(10);
   }
-  term = new maschinendeck::SerialTerminal(baudrate);
-  term->add("help", &_printHelp, "\tshow detail usage information");
-  term->add("setSSID", &_setSSID, "\tset the Wifi SSID");
-  term->add("setPASW", &_setPASW, "\tset the WiFi password");
-  term->add("connect", &_connect, "\tsave and connect to WiFi network");
-  term->add("list", &_listNetworks, "\tlist saved WiFi networks");
-  term->add("select", &_selectAP, "\tselect the default AP (default: last)");
-  term->add("mode", &_setMode, "\tset the default operation single/multi AP (slow)");
-  term->add("scan", &_scanNetworks, "\tscan WiFi networks");
-  term->add("status", &_wifiStatus, "\tWiFi status information");
-  term->add("disconnect", &_disconnect, "WiFi disconnect");
-  term->add("delete", &_deleteNetwork, "\tremove saved WiFi network by SSID\r\n");
+  wcli.add("help", &_printHelp, "\tshow detail usage information");
+  wcli.add("setSSID", &_setSSID, "\tset the Wifi SSID");
+  wcli.add("setPASW", &_setPASW, "\tset the WiFi password");
+  wcli.add("connect", &_connect, "\tsave and connect to WiFi network");
+  wcli.add("list", &_listNetworks, "\tlist saved WiFi networks");
+  wcli.add("select", &_selectAP, "\tselect the default AP (default: last)");
+  wcli.add("mode", &_setMode, "\tset the default operation single/multi AP (slow)");
+  wcli.add("scan", &_scanNetworks, "\tscan WiFi networks");
+  wcli.add("status", &_wifiStatus, "\tWiFi status information");
+  wcli.add("disconnect", &_disconnect, "WiFi disconnect");
+  wcli.add("delete", &_deleteNetwork, "\tremove saved WiFi network by SSID\r\n");
+
+  Commander::API_t API_tree[size_];
+
+  for (int i = 0; i < size_; i++) {
+    API_tree[i] = Commander::API_t{0,
+                                   NULL,
+                                   NULL,
+                                   this->commands[i]->cmd,
+                                   this->commands[i]->desc,
+                                   this->commands[i]->callback};
+  }
+
+  shell.clear();
+
+  // Attach the logo.
+  //shell.attachLogo( logo );
+
+  // Print start message
+  //Serial.println( "Program begin..." );
+
+  // There is an option to attach a debug channel to Commander.
+  // It can be handy to find any problems during the initialization
+  // phase. In this example we will use Serial for this.
+  commander.attachDebugChannel( &Serial );
+
+  // At start, Commander does not know anything about our commands.
+  // We have to attach the API_tree array from the previous steps
+  // to Commander to work properly.
+  commander.attachTree( API_tree );
+
+  // Initialize Commander.
+  commander.init();
+
+  shell.attachCommander( &commander );
+
+  // Initialize shell object.
+  shell.begin( "arnold" );
+
+
+}
+
+void ESP32WifiCLI::loop() {
+  shell.update();
+  static uint_least64_t wifiTimeStamp = 0;
+  if (millis() - wifiTimeStamp > 1000) {
+    wifiTimeStamp = millis();
+    if(cb != nullptr) cb->onWifiStatus(WiFi.status() == WL_CONNECTED); 
+  }
 }
 
 #if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_ESP32WIFICLI)

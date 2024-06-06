@@ -59,8 +59,8 @@ void gotToSuspend(int type, int seconds) {
     else esp_light_sleep_start(); 
 }
 
-void sleep(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void sleep(char *args, Stream *response) {
+  Pair<String, String> operands = wcli.parseCommand(args);
   int seconds = operands.second().toInt();
   if(operands.first().equals("deep")) {
     Serial.println("\ndeep suspending..");
@@ -75,8 +75,8 @@ void sleep(String opts) {
   }
 }
 
-void blink(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void blink(char *args, Stream *response) {
+  Pair<String, String> operands = wcli.parseCommand(args);
   int times = operands.first().toInt();
   int miliseconds = operands.second().toInt();
   for (int i = 0; i < times; i++) {
@@ -87,8 +87,8 @@ void blink(String opts) {
   }
 }
 
-void setLED(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void setLED(char *args, Stream *response) {
+  Pair<String, String> operands = wcli.parseCommand(args);
   int pin = operands.first().toInt();
   if(pin >= 0 && pin <= 31) {
     wcli.setInt("LED_PIN", pin);
@@ -100,12 +100,12 @@ void setLED(String opts) {
   }
 }
 
-void echo(String opts) {
-  String echo = maschinendeck::SerialTerminal::ParseArgument(opts);
+void echo(char *args, Stream *response) {
+  String echo = wcli.parseArgument(args);
   Serial.println(echo);
 }
 
-void reboot(String opts){
+void reboot(char *args, Stream *response){
   ESP.restart();
 }
 
@@ -124,11 +124,11 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
 
   // Enter your custom commands:
-  wcli.term->add("sleep", &sleep, "\t<mode> <time> ESP32 will enter to sleep mode");
-  wcli.term->add("echo", &echo, "\t\"message\" Echo the msg. Parameter into quotes");
-  wcli.term->add("setLED", &setLED, "\t<PIN> config the LED GPIO for blink");
-  wcli.term->add("blink", &blink, "\t<times> <millis> LED blink x times each x millis");
-  wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
+  wcli.add("sleep", &sleep, "\t<mode> <time> ESP32 will enter to sleep mode");
+  wcli.add("echo", &echo, "\t\"message\" Echo the msg. Parameter into quotes");
+  wcli.add("setLED", &setLED, "\t<PIN> config the LED GPIO for blink");
+  wcli.add("blink", &blink, "\t<times> <millis> LED blink x times each x millis");
+  wcli.add("reboot", &reboot, "\tperform a ESP32 reboot");
 }
 
 void loop() {

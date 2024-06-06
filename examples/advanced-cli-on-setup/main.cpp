@@ -62,8 +62,8 @@ void gotToSuspend(int type, int seconds) {
     else esp_light_sleep_start(); 
 }
 
-void sleep(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void sleep(char *args, Stream *response) {
+  Pair<String, String> operands = wcli.parseCommand(args);
   int seconds = operands.second().toInt();
   if(operands.first().equals("deep")) {
     Serial.println("\ndeep suspending..");
@@ -78,8 +78,8 @@ void sleep(String opts) {
   }
 }
 
-void blink(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void blink(char *args, Stream *response) {
+  Pair<String, String> operands = wcli.parseCommand(args);
   int times = operands.first().toInt();
   int miliseconds = operands.second().toInt();
   for (int i = 0; i < times; i++) {
@@ -90,8 +90,8 @@ void blink(String opts) {
   }
 }
 
-void setLED(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void setLED(char *args, Stream *response) {
+  Pair<String, String> operands = wcli.parseCommand(args);
   int pin = operands.first().toInt();
   if(pin >= 0 && pin <= 31) {
     wcli.setInt("LED_PIN", pin);
@@ -103,21 +103,21 @@ void setLED(String opts) {
   }
 }
 
-void echo(String opts) {
-  String echo = maschinendeck::SerialTerminal::ParseArgument(opts);
+void echo(char *args, Stream *response) {
+  String echo = wcli.parseArgument(args);
   Serial.println(echo);
 }
 
-void reboot(String opts){
+void reboot(char *args, Stream *response){
   ESP.restart();
 }
 
-void wcli_exit(String opts) {
+void wcli_exit(char *args, Stream *response) {
   setup_time = 0;
   setup_mode = false;
 }
 
-void wcli_setup(String opts) {
+void wcli_setup(char *args, Stream *response) {
   setup_mode = true;
   Serial.println("\r\nSetup Mode Enable (fail-safe mode)\r\n");
 }
@@ -130,21 +130,22 @@ void setup() {
   // Disable WiFi connect in boot, you able to connect after setup with connect cmd.
   wcli.disableConnectInBoot();
   wcli.setSilentMode(true);  // less debug output
-  wcli.begin();              // Alternatively, you can init with begin(115200)
 
   // Configure previously configured LED pins via CLI command
   int LED_PIN = wcli.getInt("LED_PIN", LED_PIN);
   pinMode(LED_PIN, OUTPUT);
 
   // Enter your custom commands:
-  wcli.term->add("sleep", &sleep,     "\t<mode> <time> ESP32 will enter to sleep mode");
-  wcli.term->add("echo", &echo,       "\t\"message\" Echo the msg. Parameter into quotes");
-  wcli.term->add("setLED", &setLED,   "\t<PIN> config the LED GPIO for blink");
-  wcli.term->add("blink", &blink,     "\t<times> <millis> LED blink x times each x millis");
-  wcli.term->add("reboot", &reboot,   "\tperform a ESP32 reboot");
+  wcli.add("sleep", &sleep,     "\t<mode> <time> ESP32 will enter to sleep mode");
+  wcli.add("echo", &echo,       "\t\"message\" Echo the msg. Parameter into quotes");
+  wcli.add("setLED", &setLED,   "\t<PIN> config the LED GPIO for blink");
+  wcli.add("blink", &blink,     "\t<times> <millis> LED blink x times each x millis");
+  wcli.add("reboot", &reboot,   "\tperform a ESP32 reboot");
   // setup mode commands:
-  wcli.term->add("exit", &wcli_exit,  "\texit of the setup mode. AUTO EXIT in 10 seg! :)");
-  wcli.term->add("setup", &wcli_setup,"\tTYPE THIS WORD to start to configure the device :D\n");
+  wcli.add("exit", &wcli_exit,  "\texit of the setup mode. AUTO EXIT in 10 seg! :)");
+  wcli.add("setup", &wcli_setup,"\tTYPE THIS WORD to start to configure the device :D\n");
+  
+  wcli.begin();              // Alternatively, you can init with begin(115200)
 
   // Configuration loop in setup:
   // 10 seconds for reconfiguration (first use case or fail-safe mode for example)
