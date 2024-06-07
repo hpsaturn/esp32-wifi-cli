@@ -35,13 +35,6 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   }
 
   void onHelpShow() {
-    // Enter your custom help here:
-    Serial.println("\r\nCustom commands:\r\n");
-    Serial.println("sleep <mode> <time> \tESP32 sleep mode (deep or light)");
-    Serial.println("echo \"message\" \t\tEcho the msg. Parameter into quotes");
-    Serial.println("setLED <PIN> \t\tconfig the LED GPIO for blink");
-    Serial.println("blink <times> <millis> \tLED blink x times each x millis");
-    Serial.println("reboot\t\t\tperform a soft ESP32 reboot");
   }
 
   void onNewWifi(String ssid, String passw) {
@@ -87,7 +80,7 @@ void blink(char *args, Stream *response) {
   }
 }
 
-void setLED(char *args, Stream *response) {
+void setled(char *args, Stream *response) {
   Pair<String, String> operands = wcli.parseCommand(args);
   int pin = operands.first().toInt();
   if(pin >= 0 && pin <= 31) {
@@ -106,29 +99,30 @@ void echo(char *args, Stream *response) {
 }
 
 void reboot(char *args, Stream *response){
+  wcli.shell->clear();
   ESP.restart();
 }
 
 void setup() {
-  Serial.begin(115200); // Optional, you can init it on begin()
-  Serial.flush();       // Only for showing the message on serial 
-  delay(1000);
+  Serial.begin(115200);  // Optional, you can init it on begin()
+  Serial.flush();        // Only for showing the message on serial
+  delay(3000);           // Only for this demo
   wcli.setCallback(new mESP32WifiCLICallbacks());
+  // Disable WiFi connect in boot, you able to connect after setup with connect cmd.
   // wcli.disableConnectInBoot();
-  // wcli.setSilentMode(true);
-  // wcli.clearSettings(); // Clear all networks and settings
-  wcli.begin();         // Alternatively, you can init with begin(115200) 
+  // wcli.setSilentMode(true);  // less debug output
 
   // Configure previously configured LED pins via CLI command
   int LED_PIN = wcli.getInt("LED_PIN", LED_PIN);
   pinMode(LED_PIN, OUTPUT);
 
   // Enter your custom commands:
-  wcli.add("sleep", &sleep, "\t<mode> <time> ESP32 will enter to sleep mode");
-  wcli.add("echo", &echo, "\t\"message\" Echo the msg. Parameter into quotes");
-  wcli.add("setLED", &setLED, "\t<PIN> config the LED GPIO for blink");
-  wcli.add("blink", &blink, "\t<times> <millis> LED blink x times each x millis");
-  wcli.add("reboot", &reboot, "\tperform a ESP32 reboot");
+  wcli.add("sleep", &sleep,     "\t\t<mode> <time> ESP32 sleep mode (deep/light)\r\n");
+  wcli.add("echo", &echo,       "\t\t\"message\" Echo the msg. Parameter into quotes");
+  wcli.add("setled", &setled,   "\t<PIN> config the LED GPIO for blink");
+  wcli.add("blink", &blink,     "\t\t<times> <millis> LED blink x times each x millis");
+  wcli.add("reboot", &reboot,   "\tperform a ESP32 reboot");
+  wcli.begin();  // Alternatively, you can init with begin(115200,appname)
 }
 
 void loop() {

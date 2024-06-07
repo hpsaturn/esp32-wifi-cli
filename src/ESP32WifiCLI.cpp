@@ -457,9 +457,9 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
   wcli.add("wscan", &_scanNetworks, "\t\tscan WiFi networks");
   wcli.add("wstatus", &_wifiStatus, "\tWiFi status information");
   wcli.add("wdisconnect", &_disconnect, "\tWiFi disconnect");
-  wcli.add("wdelete", &_deleteNetwork, "\tremove saved WiFi network by SSID\r\n");
+  wcli.add("wdelete", &_deleteNetwork, "\tremove saved WiFi network by SSID");
 
-  for (int i = this->size_ - 1; i < WCLI_MAX_CMDS; i++) {
+  for (int i = this->size_; i < WCLI_MAX_CMDS; i++) {
     API_tree[i] = Commander::API_t{0, NULL, NULL, "", "", NULL};
   }
 
@@ -481,6 +481,7 @@ void ESP32WifiCLI::loop() {
     wifiTimeStamp = millis();
     if(cb != nullptr) cb->onWifiStatus(WiFi.status() == WL_CONNECTED); 
   }
+  delay(5);
 }
 
 #if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_ESP32WIFICLI)

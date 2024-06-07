@@ -19,7 +19,7 @@
 #define ESP32WIFICLI_REVISION 044
 
 #ifndef WCLI_MAX_CMDS
-#define WCLI_MAX_CMDS 20
+#define WCLI_MAX_CMDS 15
 #endif
 
 
@@ -78,7 +78,7 @@ class ESP32WifiCLI {
   String app_name;
   String temp_ssid = "";
   String temp_pasw = "";
-  int size_;
+  int size_ = 0;
 
   String getNetKeyName(int net);
 
