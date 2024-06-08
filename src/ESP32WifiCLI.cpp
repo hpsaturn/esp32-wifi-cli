@@ -373,11 +373,15 @@ void _nmclicon(char *args, Stream *response) {
   if (!extract_connect_parames(args, &ssid, &password)) return;
 
   if (ssid != NULL && password != NULL) {
+    size_t len = strlen(password);
+    if (password[0] == '"' && password[len - 1] == '"') {
+      memmove(password, password + 1, len - 2);
+      password[len - 2] = '\0';
+    }
     wcli.setSSID(ssid);
     wcli.setPASW(password);
     // Serial.printf("SSID: %s\n", ssid);
     // Serial.printf("Password: %s\n", password);
-    // Free the allocated memory
     free(ssid);
     free(password);
   }
