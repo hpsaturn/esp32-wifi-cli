@@ -106,11 +106,11 @@ void reboot(char *args, Stream *response){
 void setup() {
   Serial.begin(115200);  // Optional, you can init it on begin()
   Serial.flush();        // Only for showing the message on serial
-  delay(3000);           // Only for this demo
+  delay(2000);           // Only for this demo
   wcli.setCallback(new mESP32WifiCLICallbacks());
   // Disable WiFi connect in boot, you able to connect after setup with connect cmd.
-  // wcli.disableConnectInBoot();
-  // wcli.setSilentMode(true);  // less debug output
+  wcli.disableConnectInBoot();
+  wcli.setSilentMode(true);  // less debug output
 
   // Configure previously configured LED pins via CLI command
   int LED_PIN = wcli.getInt("LED_PIN", LED_PIN);

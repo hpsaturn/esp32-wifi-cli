@@ -19,17 +19,21 @@
 #define ESP32WIFICLI_REVISION 044
 
 #ifndef WCLI_MAX_CMDS
-#define WCLI_MAX_CMDS 15
+#define WCLI_MAX_CMDS 15 // user and public commands
 #endif
+
+#define WCLI_MAX_ICMDS 10 // internal commands
 
 
 class ESP32WifiCLICallbacks;
 
 class ESP32WifiCLI {
  public:
-  Commander::API_t API_tree[WCLI_MAX_CMDS];
   Preferences cfg;
+  Commander::API_t API_tree[WCLI_MAX_CMDS];
   Commander commander;
+  Commander::API_t API_internal_tree[ WCLI_MAX_ICMDS ];
+  Commander internal;
   Shellminator* shell;
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
@@ -42,6 +46,7 @@ class ESP32WifiCLI {
   String parseArgument(String args);
   void loop();
   void printHelp();
+  void printNetworkHelp();
   void printWifiStatus();
   void scan();
   void setSSID(String ssid);
@@ -71,6 +76,7 @@ class ESP32WifiCLI {
   String getMode();
   int getDefaultAP();
   void clearSettings();
+  void addNetworkCommand(const char* command, void (*callback)(char *args, Stream *response), const char* description);
 
   void setCallback(ESP32WifiCLICallbacks* pcb);
 
@@ -78,7 +84,9 @@ class ESP32WifiCLI {
   String app_name;
   String temp_ssid = "";
   String temp_pasw = "";
+
   int size_ = 0;
+  int isize_ = 0;
 
   String getNetKeyName(int net);
 

@@ -18,19 +18,7 @@ void ESP32WifiCLI::printWifiStatus() {
 }
 
 void ESP32WifiCLI::printHelp() {
-  Serial.println("\nESP32WifiCLI Usage:\n");
-  Serial.println("setSSID \"YOUR SSID\"\tset the SSID into quotes");
-  Serial.println("setPASW \"YOUR PASW\"\tset the password into quotes");
-  Serial.println("connect  \t\tsave and connect to the network");
-  Serial.println("list \t\t\tlist all saved networks");
-  Serial.println("select <number>   \tselect the default AP (default: last saved)");
-  Serial.println("mode <single/multi>\tconnection mode. Multi AP is a little slow");
-  Serial.println("scan \t\t\tscan for available networks");
-  Serial.println("status \t\t\tprint the current WiFi status");
-  Serial.println("disconnect \t\tdisconnect from the network");
-  Serial.println("delete \"SSID\"\t\tremove saved network");
-  Serial.println("help \t\t\tprint this help");
-  if (cb != nullptr) cb->onHelpShow();
+  this->shell->printHelp();
 }
 
 void ESP32WifiCLI::scan() {
@@ -152,13 +140,13 @@ void ESP32WifiCLI::setSSID(String ssid) {
   if (temp_ssid.length() == 0) {
     Serial.println("\nSSID is empty, please set a valid SSID into quotes");
   } else {
-    Serial.println("\nset ssid to: " + temp_ssid);
+    Serial.println("set ssid to: " + temp_ssid);
   }
 }
 
 void ESP32WifiCLI::setPASW(String pasw) {
   temp_pasw = pasw;
-  Serial.println("\nset password to: " + temp_pasw);
+  Serial.println("set password to: " + temp_pasw);
 }
 
 void ESP32WifiCLI::disconnect() {
@@ -352,12 +340,19 @@ void ESP32WifiCLI::disableConnectInBoot(){
   this->connectInBoot = false;
 }
 
+void ESP32WifiCLI::printNetworkHelp(){
+  this->shell->attachCommander(&internal);
+  this->shell->printHelp();
+  delay(30);
+  this->shell->attachCommander(&commander);
+}
+
 void _scanNetworks(char *args, Stream *response) {
   wcli.scan();
 }
 
 void _printHelp(char* args, Stream *response) {
-  wcli.printHelp();
+  wcli.printNetworkHelp();
 }
 
 void _setSSID(char *args, Stream *response) {
@@ -368,6 +363,29 @@ void _setSSID(char *args, Stream *response) {
 void _setPASW(char *args, Stream *response) {
   String pasw = ParseArgument(args);
   wcli.setPASW(pasw);
+}
+
+void _nmclicon(char *args, Stream *response) {
+  // Serial.println(args);
+  char *ssid = NULL;
+  char *password = NULL;
+
+  if (!extract_connect_parames(args, &ssid, &password)) return;
+
+  if (ssid != NULL && password != NULL) {
+    wcli.setSSID(ssid);
+    wcli.setPASW(password);
+    // Serial.printf("SSID: %s\n", ssid);
+    // Serial.printf("Password: %s\n", password);
+    // Free the allocated memory
+    free(ssid);
+    free(password);
+  }
+  else{
+    printf("Invalid command syntax\n");
+    return;
+  }
+  wcli.connect();
 }
 
 void _connect(char *args, Stream *response) {
@@ -402,6 +420,10 @@ void _setMode(char *args, Stream *response) {
   wcli.setMode(operands.first());
 }
 
+void _nmcliProcessor(char *args, Stream *response) {
+  wcli.internal.execute(args);
+}
+
 void ESP32WifiCLI::add(const char* command, void (*callback)(char *args, Stream *response), const char* description) {
   if (this->size_ >= WCLI_MAX_CMDS) return;
   API_tree[this->size_] = Commander::API_t{0,
@@ -413,6 +435,16 @@ void ESP32WifiCLI::add(const char* command, void (*callback)(char *args, Stream 
   this->size_++;
 }
 
+void ESP32WifiCLI::addNetworkCommand(const char* command, void (*callback)(char *args, Stream *response), const char* description) {
+  if (this->isize_ >= WCLI_MAX_ICMDS) return;
+  API_internal_tree[this->isize_] = Commander::API_t{0,
+                                   NULL,
+                                   NULL,
+                                   command,
+                                   description,
+                                   callback};
+  this->isize_++;
+}
 Pair <String,String> ESP32WifiCLI::parseCommand(String args){
   return ParseCommand(args);
 }
@@ -447,17 +479,8 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
     reconnect();
     delay(10);
   }
-  // wcli.add("help", &_printHelp, "\tshow detail usage information");
-  wcli.add("wssid", &_setSSID, "\t\tset the Wifi SSID");
-  wcli.add("wpassw", &_setPASW, "\tset the WiFi password");
-  wcli.add("wconnect", &_connect, "\tsave WiFi ssid & passw and connect");
-  wcli.add("wlist", &_listNetworks, "\t\tlist saved WiFi networks");
-  wcli.add("wselect", &_selectAP, "\tselect the default AP (default: last)");
-  wcli.add("wmode", &_setMode, "\t\tset the default operation single/multi AP (slow)");
-  wcli.add("wscan", &_scanNetworks, "\t\tscan WiFi networks");
-  wcli.add("wstatus", &_wifiStatus, "\tWiFi status information");
-  wcli.add("wdisconnect", &_disconnect, "\tWiFi disconnect");
-  wcli.add("wdelete", &_deleteNetwork, "\tremove saved WiFi network by SSID");
+
+  wcli.add("nmcli", &_nmcliProcessor, "\t\tnetwork manager CLI. Type nmcli help for more info");
 
   for (int i = this->size_; i < WCLI_MAX_CMDS; i++) {
     API_tree[i] = Commander::API_t{0, NULL, NULL, "", "", NULL};
@@ -466,9 +489,24 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
   this->shell = &shell_;
   shell->clear();
   shell->attachLogo(logo);
-  commander.attachDebugChannel( &Serial );
+  // commander.attachDebugChannel( &Serial );
   commander.attachTreeFunction(API_tree,sizeof(API_tree)/sizeof(API_tree[0]));
   commander.init();
+  
+  wcli.addNetworkCommand("connect", &_nmclicon, "\tadd new WiFi: connect your_ssid password \"your_passw\"");
+  wcli.addNetworkCommand("scan", &_scanNetworks, "\t\tscan WiFi networks");
+  wcli.addNetworkCommand("status", &_wifiStatus, "\tWiFi status information");
+  wcli.addNetworkCommand("list", &_listNetworks, "\t\tlist saved WiFi networks and its IDs");
+  wcli.addNetworkCommand("mode", &_setMode, "\t\tset the default operation. modes: single|multi");
+  wcli.addNetworkCommand("select", &_selectAP, "\tselect the default AP by ID");
+  wcli.addNetworkCommand("up", &_connect, "\t\tenable default WiFi");
+  wcli.addNetworkCommand("down", &_disconnect, "\t\tdisconnect current WiFi");
+  wcli.addNetworkCommand("delete", &_deleteNetwork, "\tremove saved WiFi network by SSID");
+  wcli.addNetworkCommand("help", &_printHelp, "\t\tshow nmcli commands help");
+
+  // internal.attachDebugChannel( &Serial );
+  internal.attachTree(API_internal_tree);
+  internal.init();
 
   shell->attachCommander( &commander );
   shell->begin( "wcli" );
