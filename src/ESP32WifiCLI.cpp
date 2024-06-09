@@ -380,8 +380,6 @@ void _nmclicon(char *args, Stream *response) {
     }
     wcli.setSSID(ssid);
     wcli.setPASW(password);
-    // Serial.printf("SSID: %s\n", ssid);
-    // Serial.printf("Password: %s\n", password);
     free(ssid);
     free(password);
   }
@@ -471,6 +469,11 @@ const char logo[] =
 "\r\n"
 ;
 
+ESP32WifiCLI::ESP32WifiCLI(){
+  this->shell = &shell_;
+  shell->attachLogo(logo);
+}
+
 void ESP32WifiCLI::begin(long baudrate, String app) {
   app_name = app.length() == 0 ? "wifi_cli_prefs" : app;
   WiFi.mode(WIFI_STA);
@@ -484,16 +487,14 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
     delay(10);
   }
 
+  // main command for the base commander:
   wcli.add("nmcli", &_nmcliProcessor, "\t\tnetwork manager CLI. Type nmcli help for more info");
-
+  // fill unsed slots. Please increase it if we have more commands
   for (int i = this->size_; i < WCLI_MAX_CMDS; i++) {
     API_tree[i] = Commander::API_t{0, NULL, NULL, "", "", NULL};
   }
 
-  this->shell = &shell_;
-  shell->clear();
-  shell->attachLogo(logo);
-  // commander.attachDebugChannel( &Serial );
+  if(!silent) commander.attachDebugChannel( &Serial );
   commander.attachTreeFunction(API_tree,sizeof(API_tree)/sizeof(API_tree[0]));
   commander.init();
   
@@ -508,7 +509,7 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
   wcli.addNetworkCommand("delete", &_deleteNetwork, "\tremove saved WiFi network by SSID");
   wcli.addNetworkCommand("help", &_printHelp, "\t\tshow nmcli commands help");
 
-  // internal.attachDebugChannel( &Serial );
+  if(!silent) internal.attachDebugChannel( &Serial );
   internal.attachTree(API_internal_tree);
   internal.init();
 

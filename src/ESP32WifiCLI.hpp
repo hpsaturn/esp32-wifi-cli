@@ -40,6 +40,7 @@ class ESP32WifiCLI {
   bool silent = false;
   bool connectInBoot = true;
 
+  ESP32WifiCLI ();
   void begin(long baudrate = 0, String app_name = "wifi_cli_prefs");
   void add(const char* command, void(*callback)(char *args, Stream *response), const char* description = "");
   Pair <String,String> parseCommand(String args);

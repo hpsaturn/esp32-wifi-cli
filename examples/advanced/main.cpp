@@ -22,6 +22,21 @@
 
 int LED_PIN = 13;
 
+
+const char logo[] =
+"▓█████ ▒██   ██▒ ▄▄▄       ███▄ ▄███▓ ██▓███   ██▓    ▓█████ \n"
+"▓█   ▀ ▒▒ █ █ ▒░▒████▄    ▓██▒▀█▀ ██▒▓██░  ██▒▓██▒    ▓█   ▀ \n"
+"▒███   ░░  █   ░▒██  ▀█▄  ▓██    ▓██░▓██░ ██▓▒▒██░    ▒███   \n"
+"▒▓█  ▄  ░ █ █ ▒ ░██▄▄▄▄██ ▒██    ▒██ ▒██▄█▓▒ ▒▒██░    ▒▓█  ▄ \n"
+"░▒████▒▒██▒ ▒██▒ ▓█   ▓██▒▒██▒   ░██▒▒██▒ ░  ░░██████▒░▒████▒\n"
+"░░ ▒░ ░▒▒ ░ ░▓ ░ ▒▒   ▓▒█░░ ▒░   ░  ░▒▓▒░ ░  ░░ ▒░▓  ░░░ ▒░ ░\n"
+" ░ ░  ░░░   ░▒ ░  ▒   ▒▒ ░░  ░      ░░▒ ░     ░ ░ ▒  ░ ░ ░  ░\n"
+"   ░    ░    ░    ░   ▒   ░      ░   ░░         ░ ░      ░   \n"
+"   ░  ░ ░    ░        ░  ░       ░                ░  ░   ░  ░\n"
+"                                                             \n"
+"\n"
+"";
+
 /*********************************************************************
  * Optional callback.
  ********************************************************************/
@@ -122,6 +137,9 @@ void setup() {
   wcli.add("setled", &setled,   "\t<PIN> config the LED GPIO for blink");
   wcli.add("blink", &blink,     "\t\t<times> <millis> LED blink x times each x millis");
   wcli.add("reboot", &reboot,   "\tperform a ESP32 reboot");
+  
+  wcli.shell->attachLogo(logo);
+  wcli.shell->clear();
   wcli.begin();  // Alternatively, you can init with begin(115200,appname)
 }
 
