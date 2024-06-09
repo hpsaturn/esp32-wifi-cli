@@ -25,8 +25,8 @@
  * User defined commands
  ********************************************************************/
 
-void setHostname(String opts) {
-  String host = maschinendeck::SerialTerminal::ParseArgument(opts);
+void setHostname(char *args, Stream *response) {
+  String host = wcli.parseArgument(args);
   Serial.println(WiFi.localIP());
  
   int attemp = 0;
@@ -37,8 +37,8 @@ void setHostname(String opts) {
   Serial.println("MDNS started"); 
 }
 
-void getIpAddress(String opts) {
-  String host = maschinendeck::SerialTerminal::ParseArgument(opts);
+void getIpAddress(char *args, Stream *response) {
+  String host = wcli.parseArgument(args);
   Serial.printf("Resolving hostname: %s\r\n",host.c_str());
 
   while(mdns_init()!= ESP_OK){
@@ -65,7 +65,7 @@ void getIpAddress(String opts) {
   }
 }
 
-void reboot(String opts){
+void reboot(char *args, Stream *response){
   ESP.restart();
 }
 
@@ -79,9 +79,9 @@ void setup() {
   wcli.begin();         // Alternatively, you can init with begin(115200) 
 
   // Enter your custom commands:
-  wcli.term->add("host", &setHostname, "\t<hostname> set hostname into quotes");
-  wcli.term->add("getIp", &getIpAddress, "\t<hostname> get IP address of hostname into quotes");
-  wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
+  wcli.add("host", &setHostname, "\t<hostname> set hostname into quotes");
+  wcli.add("getIp", &getIpAddress, "\t<hostname> get IP address of hostname into quotes");
+  wcli.add("reboot", &reboot, "\tperform a ESP32 reboot");
 }
 
 void loop() {
