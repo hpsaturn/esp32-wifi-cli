@@ -76,12 +76,12 @@ void setup() {
   // wcli.disableConnectInBoot();
   // wcli.setSilentMode(true);
   // wcli.clearSettings(); // Clear all networks and settings
-  wcli.begin();         // Alternatively, you can init with begin(115200) 
 
   // Enter your custom commands:
   wcli.add("host", &setHostname, "\t<hostname> set hostname into quotes");
   wcli.add("getIp", &getIpAddress, "\t<hostname> get IP address of hostname into quotes");
   wcli.add("reboot", &reboot, "\tperform a ESP32 reboot");
+  wcli.begin();         // Alternatively, you can init with begin(115200) 
 }
 
 void loop() {

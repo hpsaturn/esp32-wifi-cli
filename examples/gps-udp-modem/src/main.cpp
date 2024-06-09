@@ -49,8 +49,8 @@ static void smartDelay(unsigned long ms) {
   } while (millis() - start < ms);
 }
 
-void cli_output(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void cli_output(char *args, Stream *response) {
+  Pair<String, String> operands = wcli.parseCommand(args);
   String enable = operands.first();
   if (enable.equals("on")) output_serial = true;
   else if (enable.equals("off")) output_serial = false;
@@ -75,9 +75,9 @@ void setup() {
   delay(100);
 
   // WiFi CLI init and custom commands
-  wcli.begin();
   // adding output command. To choose the Serial2 redirection, to UDP or Serial.
-  wcli.term->add("output", &cli_output, "\t[on|off] GPS serial output.");
+  wcli.add("output", &cli_output, "\t[on|off] GPS serial output.");
+  wcli.begin();
 
   // Configuration loop:
   // 15 seconds for reconfiguration or first use case.
