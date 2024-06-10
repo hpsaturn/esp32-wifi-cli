@@ -42,13 +42,13 @@ static String ParseArgument(String message) {
   return message;
 }
 
-static bool extract_connect_parames(const char* args, char** ssid, char** password) {
+static bool extract_connect_parames(const char* args, char** ssid, char** password, Stream *response) {
     const char* password_prefix = " password ";
 
     // Find the " password " prefix
     const char* password_start = strstr(args, password_prefix);
     if (password_start == NULL) {
-        printf("Invalid command syntax\n");
+        response->printf("Invalid command syntax\n");
         return false;
     }
 
@@ -58,7 +58,7 @@ static bool extract_connect_parames(const char* args, char** ssid, char** passwo
     // Allocate memory for the SSID and copy it
     *ssid = (char*)malloc(ssid_length + 1);
     if (*ssid == NULL) {
-        printf("Memory allocation failed\n");
+        response->printf("Memory allocation failed\n");
         return false;
     }
     strncpy(*ssid, args, ssid_length);
@@ -70,7 +70,7 @@ static bool extract_connect_parames(const char* args, char** ssid, char** passwo
     // Allocate memory for the password and copy it
     *password = strdup(password_start);
     if (*password == NULL) {
-        printf("Memory allocation failed\n");
+        response->printf("Memory allocation failed\n");
         free(*ssid);
         return false;
     }

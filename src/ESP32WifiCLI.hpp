@@ -22,6 +22,10 @@
 #define WCLI_MAX_CMDS 15 // user and public commands
 #endif
 
+#ifndef WCLI_SERVER_PORT
+#define WCLI_SERVER_PORT 11000
+#endif
+
 #define WCLI_MAX_ICMDS 10 // internal commands
 
 
@@ -35,6 +39,8 @@ class ESP32WifiCLI {
   Commander::API_t API_internal_tree[ WCLI_MAX_ICMDS ];
   Commander internal;
   Shellminator* shell;
+  Shellminator* shellTelnet;
+  WiFiClient* client;
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
   bool silent = false;
@@ -48,23 +54,22 @@ class ESP32WifiCLI {
   void loop();
   void printHelp();
   void printNetworkHelp();
-  void printWifiStatus();
   void scan();
   void setSSID(String ssid);
   void setPASW(String pasw);
   void connect();
   void status();
   void list();
-  void selectAP(int net);
+  void selectAP(int net, Stream* response = &Serial);
   void disconnect();
   void reconnect();
   void multiWiFiConnect();
-  void setMode(String mode);
+  void setMode(String mode = "single", Stream *response = &Serial);
   void wifiAPConnect(bool save);
   bool wifiValidation();
   bool loadAP(int net);
-  void deleteNetwork(String ssid);
-  void loadSavedNetworks(bool addAP = true);
+  void deleteNetwork(String ssid, Stream *response = &Serial);
+  void loadSavedNetworks(bool addAP = true, Stream *response = &Serial);
   bool isSSIDSaved(String ssid);
   bool isConfigured();
   void saveNetwork(String ssid, String pasw);
@@ -77,15 +82,13 @@ class ESP32WifiCLI {
   String getMode();
   int getDefaultAP();
   void clearSettings();
+  void enableTelnet();
   void addNetworkCommand(const char* command, void (*callback)(char *args, Stream *response), const char* description);
 
   void setCallback(ESP32WifiCLICallbacks* pcb);
 
  private:
   String app_name;
-  String temp_ssid = "";
-  String temp_pasw = "";
-
   int size_ = 0;
   int isize_ = 0;
 
