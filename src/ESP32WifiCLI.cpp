@@ -1,35 +1,18 @@
 #include <ESP32WifiCLI.hpp>
 #include "storage_utils.h"
+#include "telnet_cli.h"
 
 Shellminator shell_( &Serial );
-WiFiClient client_;
-WiFiServer server( WCLI_SERVER_PORT );
-Shellminator shellTelnet_( &server );
 
 String temp_ssid = "";
 String temp_pasw = "";
 
-
-const char logo[] =
-"\r\n"
-"=============================\r\n"
-"                             \r\n"
-"██     ██  ██████ ██      ██ \r\n"
-"██     ██ ██      ██      ██ \r\n"
-"██  █  ██ ██      ██      ██ \r\n"
-"██ ███ ██ ██      ██      ██ \r\n"
-" ███ ███   ██████ ███████ ██ \r\n"
-"                             \r\n"
-"=============================\r\n"
-"\r\n"
-;
-
-void terminalClientTask(void *parameter);
-
-ESP32WifiCLI::ESP32WifiCLI(){
+ESP32WifiCLI::ESP32WifiCLI() {
   this->shell = &shell_;
-  shell->attachLogo(logo);
+  shell->attachLogo(logo_wcli);
+#ifndef DISABLE_CLI_TELNET
   this->client = &client_;
+#endif
 }
 
 void ESP32WifiCLI::printHelp() {
@@ -111,10 +94,6 @@ void ESP32WifiCLI::saveNetwork(String ssid, String pasw) {
   cfg.putInt("net_count", net + 1);
   cfg.putInt("default_net", net + 1);
   cfg.end();
-}
-
-void ESP32WifiCLI::list() {
-  loadSavedNetworks(false);
 }
 
 bool ESP32WifiCLI::isSSIDSaved(String ssid) {
@@ -250,9 +229,20 @@ void ESP32WifiCLI::reconnect() {
   }
 }
 
+void ESP32WifiCLI::printNetworkHelp() {
+  this->shell->attachCommander(&internal);
+  this->shell->printHelp();
+  this->shell->attachCommander(&commander);
 
+#ifndef DISABLE_CLI_TELNET
+  if (shellTelnet == nullptr) return;
+  this->shellTelnet->attachCommander(&internal);
+  this->shellTelnet->printHelp();
+  this->shellTelnet->attachCommander(&commander);
+#endif
+}
 
-void _scanNetworks(char *args, Stream *response) {
+void _nmcli_scan(char *args, Stream *response) {
   int n = WiFi.scanNetworks();
   response->print("\nscan done: ");
   if (n == 0) {
@@ -268,7 +258,7 @@ void _scanNetworks(char *args, Stream *response) {
   }
 }
 
-void _printHelp(char* args, Stream *response) {
+void _nmcli_help(char* args, Stream *response) {
   wcli.printNetworkHelp();
 }
 
@@ -288,18 +278,18 @@ void _setPASW(char *args, Stream *response) {
   response->println("set password to: " + temp_pasw);
 }
 
-void _disconnect(char *args, Stream *response) {
+void _nmcli_down(char *args, Stream *response) {
   response->println("\nDisconnecting...");
   WiFi.disconnect();
 }
 
-void _connect(char *args, Stream *response) {
+void _nmcli_up(char *args, Stream *response) {
   if (WiFi.status() == WL_CONNECTED && temp_ssid == WiFi.SSID()) {
     response->println("\nWiFi is already connected");
     
     return;
   } else if (WiFi.status() == WL_CONNECTED) {
-    _disconnect(args, response);
+    _nmcli_down(args, response);
     delay(1000);
   }
   if (wcli.getMode().equals("single")) {
@@ -318,8 +308,7 @@ void _connect(char *args, Stream *response) {
   }
 }
 
-void _nmclicon(char *args, Stream *response) {
-  // response->println(args);
+void _nmcli_connect(char *args, Stream *response) {
   char *ssid = NULL;
   char *password = NULL;
 
@@ -331,8 +320,6 @@ void _nmclicon(char *args, Stream *response) {
       memmove(password, password + 1, len - 2);
       password[len - 2] = '\0';
     }
-    // wcli.setSSID(ssid);
-    // wcli.setPASW(password);
     temp_ssid = String(ssid);
     temp_pasw = String(password);
     free(ssid);
@@ -342,14 +329,14 @@ void _nmclicon(char *args, Stream *response) {
     response->printf("Invalid command syntax\r\n");
     return;
   }
-  _connect(args,response);
+  _nmcli_up(args,response);
 }
 
-void _listNetworks(char *args, Stream *response) {
+void _nmcli_list(char *args, Stream *response) {
   wcli.loadSavedNetworks(false, response);
 }
 
-void _wifiStatus(char *args, Stream *response) {
+void _nmcli_status(char *args, Stream *response) {
   response->print("\nWiFi SSID \t: [");
   response->println(WiFi.SSID() + "]");  // Output Network name.
   response->print("IP address  \t: ");
@@ -364,40 +351,30 @@ void _wifiStatus(char *args, Stream *response) {
   response->println(String(ESP.getFreeHeap() / 1024) + "Kb");
 }
 
-void _deleteNetwork(char *args, Stream *response) {
+void _nmcli_delete(char *args, Stream *response) {
   String ssid = ParseArgument(args);
   wcli.deleteNetwork(ssid, response);
 }
 
-void _selectAP(char *args, Stream *response) {
+void _nmcli_select(char *args, Stream *response) {
   Pair<String, String> operands = ParseCommand(args);
   int net = operands.first().toInt();
   wcli.selectAP(net, response);
 }
 
-void _setMode(char *args, Stream *response) {
+void _nmcli_mode(char *args, Stream *response) {
   Pair<String, String> operands = ParseCommand(args);
   wcli.setMode(operands.first(), response);
 }
 
-void _nmcliProcessor(char *args, Stream *response) {
+void _nmcli(char *args, Stream *response) {
   if (strlen(args) == 0) {
-    _printHelp(args, response);
+    _nmcli_help(args, response);
   } else
     wcli.internal.execute(args, response);
 }
 
-void ESP32WifiCLI::printNetworkHelp() {
-  this->shell->attachCommander(&internal);
-  this->shell->printHelp();
-  this->shell->attachCommander(&commander);
-  if (shellTelnet == nullptr) return;
-  this->shellTelnet->attachCommander(&internal);
-  this->shellTelnet->printHelp();
-  this->shellTelnet->attachCommander(&commander);
-}
-
-void ESP32WifiCLI::connect() { _connect(NULL, &Serial); }
+void ESP32WifiCLI::connect() { _nmcli_up(NULL, &Serial); }
 
 void ESP32WifiCLI::setCallback(ESP32WifiCLICallbacks *pcb) { this->cb = pcb; }
 
@@ -409,11 +386,17 @@ void ESP32WifiCLI::setSSID(String ssid) { _setSSID(NULL, &Serial); }
 
 void ESP32WifiCLI::setPASW(String pasw) { _setPASW(NULL, &Serial); }
 
-void ESP32WifiCLI::disconnect() { _disconnect(NULL, &Serial); }
+void ESP32WifiCLI::disconnect() { _nmcli_down(NULL, &Serial); }
 
-void ESP32WifiCLI::scan() { _scanNetworks(NULL, &Serial); }
+void ESP32WifiCLI::scan() { _nmcli_scan(NULL, &Serial); }
 
-void ESP32WifiCLI::status() { _wifiStatus(NULL, &Serial); }
+void ESP32WifiCLI::status() { _nmcli_status(NULL, &Serial); }
+
+void ESP32WifiCLI::list() { loadSavedNetworks(false); }
+
+Pair<String, String> ESP32WifiCLI::parseCommand(String args) { return ParseCommand(args); }
+
+String ESP32WifiCLI::parseArgument(String args) { return ParseArgument(args); }
 
 void ESP32WifiCLI::add(const char* command, void (*callback)(char *args, Stream *response), const char* description) {
   if (this->size_ >= WCLI_MAX_CMDS) return;
@@ -436,25 +419,10 @@ void ESP32WifiCLI::addNetworkCommand(const char* command, void (*callback)(char 
                                    callback};
   this->isize_++;
 }
-Pair <String,String> ESP32WifiCLI::parseCommand(String args){
-  return ParseCommand(args);
-}
 
-String ESP32WifiCLI::parseArgument(String args){
-  return ParseArgument(args);
-}
-
-void ESP32WifiCLI::enableTelnet(){
-  this->shellTelnet = &shellTelnet_;
-  shellTelnet->attachCommander( &wcli.commander );
-  shellTelnet->attachLogo( logo );
-  shellTelnet->beginServer();
-  server.begin(); 
-  xTaskCreate( terminalClientTask, "Terminal Client Task", 10000, NULL, 1, NULL );
-}
-
-void ESP32WifiCLI::begin(long baudrate, String app) {
+void ESP32WifiCLI::begin(String prompt_name, String app) {
   app_name = app.length() == 0 ? "wifi_cli_prefs" : app;
+  prompt = prompt_name;
   WiFi.mode(WIFI_STA);
   Serial.flush();
   delay(10);
@@ -467,7 +435,7 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
   }
 
   // main command for the base commander:
-  wcli.add("nmcli", &_nmcliProcessor, "\t\tnetwork manager CLI. Type nmcli help for more info");
+  wcli.add("nmcli", &_nmcli, "\t\tnetwork manager CLI. Type nmcli help for more info");
   // fill unsed slots. Please increase it if we have more commands
   for (int i = this->size_; i < WCLI_MAX_CMDS; i++) {
     API_tree[i] = Commander::API_t{0, NULL, NULL, "", "", NULL};
@@ -477,23 +445,27 @@ void ESP32WifiCLI::begin(long baudrate, String app) {
   commander.attachTreeFunction(API_tree,sizeof(API_tree)/sizeof(API_tree[0]));
   commander.init();
   
-  wcli.addNetworkCommand("connect", &_nmclicon, "\tadd new WiFi: connect your_ssid password \"your_passw\"");
-  wcli.addNetworkCommand("scan", &_scanNetworks, "\t\tscan WiFi networks");
-  wcli.addNetworkCommand("status", &_wifiStatus, "\tWiFi status information");
-  wcli.addNetworkCommand("list", &_listNetworks, "\t\tlist saved WiFi networks and its IDs");
-  wcli.addNetworkCommand("mode", &_setMode, "\t\tset the default operation. modes: single|multi");
-  wcli.addNetworkCommand("select", &_selectAP, "\tselect the default AP by ID");
-  wcli.addNetworkCommand("up", &_connect, "\t\tenable default WiFi");
-  wcli.addNetworkCommand("down", &_disconnect, "\t\tdisconnect current WiFi");
-  wcli.addNetworkCommand("delete", &_deleteNetwork, "\tremove saved WiFi network by SSID");
-  wcli.addNetworkCommand("help", &_printHelp, "\t\tshow nmcli commands help");
+  wcli.addNetworkCommand("connect", &_nmcli_connect, "\tadd new WiFi: connect your_ssid password \"your_passw\"");
+  wcli.addNetworkCommand("scan", &_nmcli_scan, "\t\tscan WiFi networks");
+  wcli.addNetworkCommand("status", &_nmcli_status, "\tWiFi status information");
+  wcli.addNetworkCommand("list", &_nmcli_list, "\t\tlist saved WiFi networks and its IDs");
+  wcli.addNetworkCommand("mode", &_nmcli_mode, "\t\tset the default operation. modes: single|multi");
+  wcli.addNetworkCommand("select", &_nmcli_select, "\tselect the default AP by ID");
+  wcli.addNetworkCommand("up", &_nmcli_up, "\t\tenable default WiFi");
+  wcli.addNetworkCommand("down", &_nmcli_down, "\t\tdisconnect current WiFi");
+  wcli.addNetworkCommand("delete", &_nmcli_delete, "\tremove saved WiFi network by SSID");
+  wcli.addNetworkCommand("help", &_nmcli_help, "\t\tshow nmcli commands help");
+  
+  #ifndef DISABLE_CLI_TELNET 
+  wcli.addNetworkCommand("telnet", &_nmcli_telnet, "\tenable remote shell via Telnet. opts: on/off");
+  #endif
 
   if(!silent) internal.attachDebugChannel( &Serial );
   internal.attachTree(API_internal_tree);
   internal.init();
 
   shell->attachCommander( &commander );
-  shell->begin( "wcli" );
+  shell->begin(prompt.c_str() );
 }
 
 void ESP32WifiCLI::loop() {
@@ -504,24 +476,6 @@ void ESP32WifiCLI::loop() {
     if(cb != nullptr) cb->onWifiStatus(WiFi.status() == WL_CONNECTED); 
   }
   delay(5);
-}
-
-void terminalClientTask(void *parameter) {
-  for (;;) {
-    client_ = server.available();
-
-    if (client_) {
-      shellTelnet_.clear();
-      shellTelnet_.begin("WiFi");
-
-      while (client_.connected()) {
-        shellTelnet_.update();
-        vTaskDelay(10);
-      }
-    }
-
-    vTaskDelay(10);
-  }
 }
 
 #if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_ESP32WIFICLI)

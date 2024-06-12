@@ -10,7 +10,8 @@
 #include <Commander-API.hpp>
 #include <Commander-IO.hpp>
 
-#include <parser_arguments.h>
+#include "parser_utils.h"
+#include "logo_wcli.h"
 
 #define RW_MODE false
 #define RO_MODE true
@@ -26,8 +27,12 @@
 #define WCLI_SERVER_PORT 11000
 #endif
 
-#define WCLI_MAX_ICMDS 10 // internal commands
 
+#ifndef DISABLE_CLI_TELNET
+#define WCLI_MAX_ICMDS 11 // internal commands
+#else
+#define WCLI_MAX_ICMDS 10 // internal commands
+#endif
 
 class ESP32WifiCLICallbacks;
 
@@ -40,14 +45,15 @@ class ESP32WifiCLI {
   Commander internal;
   Shellminator* shell;
   Shellminator* shellTelnet;
+  String prompt;
   WiFiClient* client;
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
-  bool silent = false;
+  bool silent = true;
   bool connectInBoot = true;
 
   ESP32WifiCLI ();
-  void begin(long baudrate = 0, String app_name = "wifi_cli_prefs");
+  void begin(String prompt_name="wcli", String app_name = "wifi_cli_prefs");
   void add(const char* command, void(*callback)(char *args, Stream *response), const char* description = "");
   Pair <String,String> parseCommand(String args);
   String parseArgument(String args);
@@ -77,12 +83,13 @@ class ESP32WifiCLI {
   int32_t getInt(String key, int defaultValue);
   void setString(String key, String value);
   String getString(String key, String defaultValue);
-  void setSilentMode(bool enable);
+  void setSilentMode(bool enable = true);
   void disableConnectInBoot();
   String getMode();
   int getDefaultAP();
   void clearSettings();
   void enableTelnet();
+  void disableTelnet();
   void addNetworkCommand(const char* command, void (*callback)(char *args, Stream *response), const char* description);
 
   void setCallback(ESP32WifiCLICallbacks* pcb);
