@@ -38,7 +38,7 @@ class ESP32WifiCLICallbacks;
 
 class ESP32WifiCLI {
  public:
-  Preferences cfg;
+  Preferences wcfg;
   Commander::API_t API_tree[WCLI_MAX_CMDS];
   Commander commander;
   Commander::API_t API_internal_tree[ WCLI_MAX_ICMDS ];

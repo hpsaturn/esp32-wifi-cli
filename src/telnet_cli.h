@@ -6,7 +6,6 @@ WiFiServer server( WCLI_SERVER_PORT );
 Shellminator shellTelnet_( &server );
 TaskHandle_t telnet_handle = NULL;
 
-
 void initClientSession(const char * prompt) {
   Serial.println("\r\nTelnet session ready");
   shellTelnet_.begin(prompt);
@@ -57,13 +56,13 @@ void _nmcli_telnet(char *args, Stream *response) {
   else if (param.equals("OFF") || param.equals("STOP"))
     enable = false;
   else {
-    response->println("invalid syntax: on/off or star/stop");
+    response->println("invalid syntax: use on/off or star/stop");
     return;
   }
   if (enable) {
     response->println("starting telnet server..");
     startTelnet(); 
-    delay(2000);
+    delay(1000);
   }
   else {
     response->println("stopping telnet server..");

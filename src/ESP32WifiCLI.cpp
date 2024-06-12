@@ -27,21 +27,21 @@ String ESP32WifiCLI::getNetKeyName(int net) {
 }
 
 void ESP32WifiCLI::loadSavedNetworks(bool addAP, Stream *response) {
-  cfg.begin(app_name.c_str(), RO_MODE);
+  wcfg.begin(app_name.c_str(), RO_MODE);
   int net = 1;
-  int default_net = cfg.getInt("default_net", 1);
+  int default_net = wcfg.getInt("default_net", 1);
   if (!addAP) response->println("\nSaved networks:\n");
-  while (cfg.isKey(String(getNetKeyName(net) + "_ssid").c_str())) {
+  while (wcfg.isKey(String(getNetKeyName(net) + "_ssid").c_str())) {
     String key = getNetKeyName(net);
-    String ssid = cfg.getString(String(key + "_ssid").c_str(), "");
-    String pasw = cfg.getString(String(key + "_pasw").c_str(), "");
+    String ssid = wcfg.getString(String(key + "_ssid").c_str(), "");
+    String pasw = wcfg.getString(String(key + "_pasw").c_str(), "");
     String dfl = (net == default_net) ? "*" : " ";
     if (!addAP) response->printf("(%s) %d: [%s]\r\n", dfl.c_str(), net, ssid.c_str());
     if (addAP) wifiMulti.addAP(ssid.c_str(), pasw.c_str());
     net++;
   }
   if(!addAP)response->println("");
-  cfg.end();
+  wcfg.end();
 }
 
 void ESP32WifiCLI::deleteNetwork(String ssid, Stream *response) {
@@ -51,64 +51,64 @@ void ESP32WifiCLI::deleteNetwork(String ssid, Stream *response) {
   }
   int net = 1;
   bool dropped = false;
-  cfg.begin(app_name.c_str(), RW_MODE);
-  while (cfg.isKey(String(getNetKeyName(net) + "_ssid").c_str())) {
+  wcfg.begin(app_name.c_str(), RW_MODE);
+  while (wcfg.isKey(String(getNetKeyName(net) + "_ssid").c_str())) {
     String key = getNetKeyName(net++);
-    String ssid_ = cfg.getString(String(key + "_ssid").c_str(), "");
+    String ssid_ = wcfg.getString(String(key + "_ssid").c_str(), "");
     if (!dropped && ssid_.equals(ssid)) {
       response->printf("\nDeleting network [%s][%s]\r\n", key.c_str(), ssid.c_str());
-      cfg.remove(String(key + "_ssid").c_str());
-      cfg.remove(String(key + "_pasw").c_str());
+      wcfg.remove(String(key + "_ssid").c_str());
+      wcfg.remove(String(key + "_pasw").c_str());
       dropped = true;
-      int net_count = cfg.getInt("net_count", 0);
-      cfg.putInt("net_count", net_count - 1);
-      int default_net = cfg.getInt("default_net", 1);
-      if (net - 1 == default_net && net_count > 1 ) cfg.putInt("default_net", net_count - 1);
+      int net_count = wcfg.getInt("net_count", 0);
+      wcfg.putInt("net_count", net_count - 1);
+      int default_net = wcfg.getInt("default_net", 1);
+      if (net - 1 == default_net && net_count > 1 ) wcfg.putInt("default_net", net_count - 1);
       continue;
     }
     if (dropped) {
-      String ssid_drop = cfg.getString(String(key + "_ssid").c_str(), "");
-      String pasw_drop = cfg.getString(String(key + "_pasw").c_str(), "");
+      String ssid_drop = wcfg.getString(String(key + "_ssid").c_str(), "");
+      String pasw_drop = wcfg.getString(String(key + "_pasw").c_str(), "");
       String key_drop = getNetKeyName(net - 2);
       // response->printf("ssid drop: [%s][%d][%s]\r\n",ssid_drop.c_str(), net - 2, key_drop.c_str());
-      cfg.putString(String(key_drop + "_ssid").c_str(), ssid_drop);
-      cfg.putString(String(key_drop + "_pasw").c_str(), pasw_drop);
+      wcfg.putString(String(key_drop + "_ssid").c_str(), ssid_drop);
+      wcfg.putString(String(key_drop + "_pasw").c_str(), pasw_drop);
       // response->printf("remove key: [%d][%s]\r\n",net - 1, key.c_str());
-      int default_net = cfg.getInt("default_net", 1);
-      if (net - 1 == default_net) cfg.putInt("default_net", net - 2);
-      cfg.remove(String(key + "_ssid").c_str());
-      cfg.remove(String(key + "_pasw").c_str());
+      int default_net = wcfg.getInt("default_net", 1);
+      if (net - 1 == default_net) wcfg.putInt("default_net", net - 2);
+      wcfg.remove(String(key + "_ssid").c_str());
+      wcfg.remove(String(key + "_pasw").c_str());
     }
   }
-  cfg.end();
+  wcfg.end();
   loadSavedNetworks(false, response);
 }
 
 void ESP32WifiCLI::saveNetwork(String ssid, String pasw) {
-  cfg.begin(app_name.c_str(), RW_MODE);
-  int net = cfg.getInt("net_count", 0);
+  wcfg.begin(app_name.c_str(), RW_MODE);
+  int net = wcfg.getInt("net_count", 0);
   String key = getNetKeyName(net + 1);
   if (!silent) Serial.printf("Saving network: [%s][%s]\r\n", ssid.c_str(), pasw.c_str());
-  cfg.putString(String(key + "_ssid").c_str(), ssid);
-  cfg.putString(String(key + "_pasw").c_str(), pasw);
-  cfg.putInt("net_count", net + 1);
-  cfg.putInt("default_net", net + 1);
-  cfg.end();
+  wcfg.putString(String(key + "_ssid").c_str(), ssid);
+  wcfg.putString(String(key + "_pasw").c_str(), pasw);
+  wcfg.putInt("net_count", net + 1);
+  wcfg.putInt("default_net", net + 1);
+  wcfg.end();
 }
 
 bool ESP32WifiCLI::isSSIDSaved(String ssid) {
-  cfg.begin(app_name.c_str(), RO_MODE);
+  wcfg.begin(app_name.c_str(), RO_MODE);
   bool isSaved = false;
   int net = 1;
-  while (cfg.isKey(String(getNetKeyName(net) + "_ssid").c_str())) {
+  while (wcfg.isKey(String(getNetKeyName(net) + "_ssid").c_str())) {
     String key = getNetKeyName(net++);
-    String ssid_ = cfg.getString(String(key + "_ssid").c_str(), "");
+    String ssid_ = wcfg.getString(String(key + "_ssid").c_str(), "");
     if (ssid_.equals(ssid)) {
       isSaved = true;
       break;
     }
   }
-  cfg.end();
+  wcfg.end();
   return isSaved;
 }
 
@@ -151,24 +151,24 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
 }
 
 bool ESP32WifiCLI::isConfigured() {
-  cfg.begin("wifi_cli_prefs", RO_MODE);
+  wcfg.begin("wifi_cli_prefs", RO_MODE);
   String key = getNetKeyName(1);
-  bool isConfigured = cfg.isKey(String(key + "_ssid").c_str());
-  cfg.end();
+  bool isConfigured = wcfg.isKey(String(key + "_ssid").c_str());
+  wcfg.end();
   return isConfigured;
 }
 
 bool ESP32WifiCLI::loadAP(int net) {
-  cfg.begin(app_name.c_str(), RO_MODE);
+  wcfg.begin(app_name.c_str(), RO_MODE);
   String key = getNetKeyName(net);
-  if (!cfg.isKey(String(key + "_ssid").c_str())) {
-    cfg.end();
+  if (!wcfg.isKey(String(key + "_ssid").c_str())) {
+    wcfg.end();
     return false;
   }
-  // Serial.printf("\nDefault AP: %i: [%s]\r\n", net, cfg.getString(String(key + "_ssid").c_str(), "").c_str());
-  temp_ssid = cfg.getString(String(key + "_ssid").c_str(), "");
-  temp_pasw = cfg.getString(String(key + "_pasw").c_str(), "");
-  cfg.end();
+  // Serial.printf("\nDefault AP: %i: [%s]\r\n", net, wcfg.getString(String(key + "_ssid").c_str(), "").c_str());
+  temp_ssid = wcfg.getString(String(key + "_ssid").c_str(), "");
+  temp_pasw = wcfg.getString(String(key + "_pasw").c_str(), "");
+  wcfg.end();
   return true;
 }
 
@@ -177,38 +177,38 @@ void ESP32WifiCLI::selectAP(int net, Stream *response) {
     response->println("\nNetwork not found");
     return;
   }
-  cfg.begin(app_name.c_str(), RW_MODE);
-  cfg.putInt("default_net", net);
-  cfg.end();
+  wcfg.begin(app_name.c_str(), RW_MODE);
+  wcfg.putInt("default_net", net);
+  wcfg.end();
   loadSavedNetworks(false, response);
 }
 
 int ESP32WifiCLI::getDefaultAP() {
-  cfg.begin(app_name.c_str(), RO_MODE);
-  int net = cfg.getInt("default_net", 1);
-  cfg.end();
+  wcfg.begin(app_name.c_str(), RO_MODE);
+  int net = wcfg.getInt("default_net", 1);
+  wcfg.end();
   return net;
 }
 
 String ESP32WifiCLI::getMode() {
-  cfg.begin(app_name.c_str(), RO_MODE);
-  String mode = cfg.getString("mode", "single");
-  cfg.end();
+  wcfg.begin(app_name.c_str(), RO_MODE);
+  String mode = wcfg.getString("mode", "single");
+  wcfg.end();
   return mode;
 }
 
 void ESP32WifiCLI::setMode(String mode, Stream *response) {
-  cfg.begin(app_name.c_str(), RW_MODE);
+  wcfg.begin(app_name.c_str(), RW_MODE);
   if (mode.equals("single")) {
-    cfg.putString("mode", "single");
+    wcfg.putString("mode", "single");
   } else if (mode.equals("multi")) {
-    cfg.putString("mode", "multi");
+    wcfg.putString("mode", "multi");
   } else if (mode.equals("")) {
-    response->printf("\nCurrent mode: %s\r\n", cfg.getString("mode", "single").c_str());
+    response->printf("\nCurrent mode: %s\r\n", wcfg.getString("mode", "single").c_str());
   } else {
     response->println("\nInvalid mode, please use single/multi parameter");
   }
-  cfg.end();
+  wcfg.end();
 }
 
 void ESP32WifiCLI::multiWiFiConnect() {
@@ -457,7 +457,7 @@ void ESP32WifiCLI::begin(String prompt_name, String app) {
   wcli.addNetworkCommand("help", &_nmcli_help, "\t\tshow nmcli commands help");
   
   #ifndef DISABLE_CLI_TELNET 
-  wcli.addNetworkCommand("telnet", &_nmcli_telnet, "\tenable remote shell via Telnet. opts: on/off");
+  wcli.addNetworkCommand("telnet", &_nmcli_telnet, "\tstart/stop Telnet service. Status: ");
   #endif
 
   if(!silent) internal.attachDebugChannel( &Serial );
