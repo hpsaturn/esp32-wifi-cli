@@ -53,27 +53,31 @@ class ESP32WifiCLI {
   bool connectInBoot = true;
 
   ESP32WifiCLI ();
-  void begin(String prompt_name="wcli", String app_name = "wifi_cli_prefs");
-  void add(const char* command, void(*callback)(char *args, Stream *response), const char* description = "");
-  Pair <String,String> parseCommand(String args);
-  String parseArgument(String args);
+  void begin(String prompt_name="wcli", String app_name = "wifi_cli_prefs"); 
   void loop();
   void printHelp();
   void printNetworkHelp();
+
+  String getMode();
+  void setMode(String mode = "single", Stream *response = &Serial);
+  int getDefaultAP();
+  void selectAP(int net, Stream* response = &Serial);
+  void wifiAPConnect(bool save);
+  bool loadAP(int net);
+  void multiWiFiConnect();
+  bool wifiValidation();
+  void enableTelnet();
+  void disableTelnet();
+  bool isTelnetEnable();
   void scan();
   void setSSID(String ssid);
   void setPASW(String pasw);
   void connect();
-  void status();
+  void status(Stream *response = &Serial);
   void list();
-  void selectAP(int net, Stream* response = &Serial);
   void disconnect();
   void reconnect();
-  void multiWiFiConnect();
-  void setMode(String mode = "single", Stream *response = &Serial);
-  void wifiAPConnect(bool save);
-  bool wifiValidation();
-  bool loadAP(int net);
+
   void deleteNetwork(String ssid, Stream *response = &Serial);
   void loadSavedNetworks(bool addAP = true, Stream *response = &Serial);
   bool isSSIDSaved(String ssid);
@@ -83,14 +87,16 @@ class ESP32WifiCLI {
   int32_t getInt(String key, int defaultValue);
   void setString(String key, String value);
   String getString(String key, String defaultValue);
+  void clearSettings();
+
   void setSilentMode(bool enable = true);
   void disableConnectInBoot();
-  String getMode();
-  int getDefaultAP();
-  void clearSettings();
-  void enableTelnet();
-  void disableTelnet();
+ 
+  void add(const char* command, void(*callback)(char *args, Stream *response), const char* description = "");
   void addNetworkCommand(const char* command, void (*callback)(char *args, Stream *response), const char* description);
+  
+  Pair <String,String> parseCommand(String args);
+  String parseArgument(String args);
 
   void setCallback(ESP32WifiCLICallbacks* pcb);
 

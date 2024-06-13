@@ -1,6 +1,5 @@
 #include "ESP32WifiCLI.hpp"
 
-
 void ESP32WifiCLI::setInt(String key, int value) {
   wcfg.begin(app_name.c_str(), RW_MODE);
   wcfg.putInt(key.c_str(), value);

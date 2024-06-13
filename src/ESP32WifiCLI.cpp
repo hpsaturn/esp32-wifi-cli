@@ -337,16 +337,13 @@ void _nmcli_list(char *args, Stream *response) {
 }
 
 void _nmcli_status(char *args, Stream *response) {
-  response->print("\nWiFi SSID \t: [");
-  response->println(WiFi.SSID() + "]");  // Output Network name.
+  response->println("\nWiFi SSID \t: ["+WiFi.SSID() + "]");
   response->print("IP address  \t: ");
-  response->println(WiFi.localIP());     // Output IP Address.
-  response->print("RSSI signal \t: ");
-  response->println(WiFi.RSSI());        // Output signal strength.
-  response->print("MAC Address\t: ");
-  response->println(WiFi.macAddress());  // Output MAC address.
-  response->print("Hostname \t: ");
-  response->println(WiFi.getHostname()); // Output hostname.
+  response->println(WiFi.localIP());
+  response->printf("RSSI signal \t: %03i\r\n",WiFi.RSSI());
+  response->println("MAC Address\t: "+WiFi.macAddress());
+  response->printf("Hostname \t: %s\r\n",WiFi.getHostname());
+  response->printf("Telnet status\t: %s\r\n",telnetStatus().c_str());
   response->print("Memory free\t: ");
   response->println(String(ESP.getFreeHeap() / 1024) + "Kb");
 }
@@ -390,7 +387,7 @@ void ESP32WifiCLI::disconnect() { _nmcli_down(NULL, &Serial); }
 
 void ESP32WifiCLI::scan() { _nmcli_scan(NULL, &Serial); }
 
-void ESP32WifiCLI::status() { _nmcli_status(NULL, &Serial); }
+void ESP32WifiCLI::status(Stream *response) { _nmcli_status(NULL, response); }
 
 void ESP32WifiCLI::list() { loadSavedNetworks(false); }
 
@@ -457,7 +454,8 @@ void ESP32WifiCLI::begin(String prompt_name, String app) {
   wcli.addNetworkCommand("help", &_nmcli_help, "\t\tshow nmcli commands help");
   
   #ifndef DISABLE_CLI_TELNET 
-  wcli.addNetworkCommand("telnet", &_nmcli_telnet, "\tstart/stop Telnet service. Status: ");
+  wcli.addNetworkCommand("telnet", &_nmcli_telnet, "\tstart/stop Telnet service");
+  if (isTelnetEnable()) wcli.enableTelnet();
   #endif
 
   if(!silent) internal.attachDebugChannel( &Serial );
