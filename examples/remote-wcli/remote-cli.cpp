@@ -20,8 +20,6 @@
 
 #include <ESP32WifiCLI.hpp>
 
-int LED_PIN = 17;
-
 const char logo[] =
 "                                                             \r\n"
 "▓█████ ▒██   ██▒ ▄▄▄       ███▄ ▄███▓ ██▓███   ██▓    ▓█████ \r\n"

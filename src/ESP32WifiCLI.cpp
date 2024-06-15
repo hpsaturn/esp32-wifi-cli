@@ -343,7 +343,9 @@ void _nmcli_status(char *args, Stream *response) {
   response->printf("RSSI signal \t: %03i\r\n",WiFi.RSSI());
   response->println("MAC Address\t: "+WiFi.macAddress());
   response->printf("Hostname \t: %s\r\n",WiFi.getHostname());
+  #ifndef DISABLE_CLI_TELNET
   response->printf("Telnet status\t: %s\r\n",telnetStatus().c_str());
+  #endif
   response->print("Memory free\t: ");
   response->println(String(ESP.getFreeHeap() / 1024) + "Kb");
 }
