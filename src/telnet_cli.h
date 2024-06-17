@@ -89,7 +89,7 @@ void ESP32WifiCLI::disableTelnet() {
 
 bool ESP32WifiCLI::isTelnetEnable() { 
   wcfg.begin(app_name.c_str(), RO_MODE);
-  bool enable = wcfg.getBool("telnet_enable", true);
+  bool enable = wcfg.getBool("telnet_enable", false);
   wcfg.end();
   return enable;
 }
