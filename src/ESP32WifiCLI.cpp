@@ -456,7 +456,7 @@ void ESP32WifiCLI::begin(String prompt_name, String app) {
   wcli.addNetworkCommand("help", &_nmcli_help, "\t\tshow nmcli commands help");
   
   #ifndef DISABLE_CLI_TELNET 
-  wcli.addNetworkCommand("telnet", &_nmcli_telnet, "\tstart/stop Telnet service");
+  wcli.addNetworkCommand("telnet", &_nmcli_telnet, "\tenable/disable Telnet service");
   if (isTelnetEnable()) wcli.enableTelnet();
   #endif
 

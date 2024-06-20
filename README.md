@@ -10,18 +10,19 @@ Basic and extendible Wifi CLI manager via serial command line for ESP32
 
 ## Features
 
-- [x] interactive serial terminal, prompt and backspace support
-- [x] extendible: custom user commands and also the help menu
+- [x] Wifi networks manager (add, list, delete, default)
 - [x] Wifi multi AP and single AP modes
+- [x] **New Telnet service** for remote shell via IP and port
+- [x] **New shell improved** & migrated to Shellminator development:
+- [x] **New interactive shell**, autocomplete, history, prompt, logo and others.
+- [x] extendible custom user commands
 - [x] preferences persist in flash ROM
 - [x] two parsers: Argument into quotes or two parameters without quotes
 - [x] debug messages mode off (new silent mode)
 - [x] disable auto connect in the boot
-- [x] extend the CLI events callbacks (see examples)
-- [x] esp8266 support
 - [x] esp32c3, esp32s3 support
-- [x] launch terminal in setup (example)
-- [ ] improve VT100 compatibility (some minor issues on some terminals)
+- [x] VT100 compatibility
+- [ ] esp8266 support
 
 ## Basic implementation
 
@@ -32,7 +33,6 @@ Basic and extendible Wifi CLI manager via serial command line for ESP32
 void setup() {
   Serial.begin(115200);  // set here the Serial baudrate or in
   wcli.begin();          // the begin method like a parameter
-  delay(100);
 }
 
 void loop() {
