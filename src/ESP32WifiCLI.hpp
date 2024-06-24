@@ -29,9 +29,9 @@
 
 
 #ifndef DISABLE_CLI_TELNET
-#define WCLI_MAX_ICMDS 11 // internal commands
+#define WCLI_MAX_ICMDS 12 // internal commands
 #else
-#define WCLI_MAX_ICMDS 10 // internal commands
+#define WCLI_MAX_ICMDS 11 // internal commands
 #endif
 
 class ESP32WifiCLICallbacks;
@@ -50,7 +50,6 @@ class ESP32WifiCLI {
   WiFiMulti wifiMulti;
   const uint32_t connectTimeoutMs = 10000;
   bool silent = true;
-  bool connectInBoot = true;
 
   ESP32WifiCLI ();
   void begin(String prompt_name="wcli", String app_name = "wifi_cli_prefs"); 
@@ -69,6 +68,9 @@ class ESP32WifiCLI {
   void enableTelnet();
   void disableTelnet();
   bool isTelnetEnable();
+  void disableAutoConnect();
+  void enableAutoConnect();
+  bool isAutoConnectEnable();
   void scan();
   void setSSID(String ssid);
   void setPASW(String pasw);
@@ -90,13 +92,13 @@ class ESP32WifiCLI {
   void clearSettings();
 
   void setSilentMode(bool enable = true);
-  void disableConnectInBoot();
  
   void add(const char* command, void(*callback)(char *args, Stream *response), const char* description = "");
   void addNetworkCommand(const char* command, void (*callback)(char *args, Stream *response), const char* description);
   
   Pair <String,String> parseCommand(String args);
   String parseArgument(String args);
+  int parseEnableDisable(String args);
 
   void setCallback(ESP32WifiCLICallbacks* pcb);
 

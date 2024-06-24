@@ -48,28 +48,20 @@ String telnetStatus(){
 }
 
 void _nmcli_telnet(char *args, Stream *response) {
-  Pair<String, String> operands = wcli.parseCommand(args);
-  String param = operands.first();
-  param.toUpperCase();
-  bool enable;
-  if (param.equals("ENABLE"))
-    enable = true;
-  else if (param.equals("DISABLE"))
-    enable = false;
-  else {
-    response->println("invalid syntax: use\033[0;33m nmcli telnet [enable|disable]\033[0m");
-    response->printf("service status: %s\r\n", telnetStatus().c_str());
-    return;
-  }
-  if (enable) {
+  int enable = wcli.parseEnableDisable(args);
+  if (enable == 1) {
     response->println("starting telnet server..");
     wcli.enableTelnet();
     delay(1000);
   }
-  else {
+  else if (enable == 0) {
     response->println("stopping telnet server..");
     wcli.disableTelnet();
     delay(1000);
+  }
+  else {
+    response->println("invalid syntax: use\033[0;33m nmcli telnet [enable|disable]\033[0m");
+    response->printf("service status: %s\r\n", telnetStatus().c_str());
   }
 }
 
