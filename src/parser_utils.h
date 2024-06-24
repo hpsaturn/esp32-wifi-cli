@@ -42,6 +42,19 @@ static String ParseArgument(String message) {
   return message;
 }
 
+static int ParseEnableDisable(String args) {
+  Pair<String, String> operands = ParseCommand(args);
+  String param = operands.first();
+  param.toUpperCase();
+  bool enable;
+  if (param.equals("ENABLE"))
+    return 1;
+  else if (param.equals("DISABLE"))
+    return 0;
+  else 
+    return -1;
+}
+
 static bool extract_connect_parames(const char* args, char** ssid, char** password, Stream *response) {
     const char* password_prefix = " password ";
 

@@ -229,6 +229,45 @@ void ESP32WifiCLI::reconnect() {
   }
 }
 
+void ESP32WifiCLI::enableAutoConnect() {
+  wcfg.begin(app_name.c_str(), RW_MODE);
+  wcfg.putBool("auto_connect",true);
+  wcfg.end();
+}
+
+void ESP32WifiCLI::disableAutoConnect() { 
+  wcfg.begin(app_name.c_str(), RW_MODE);
+  wcfg.putBool("auto_connect",false);
+  wcfg.end();
+}
+
+bool ESP32WifiCLI::isAutoConnectEnable() { 
+  wcfg.begin(app_name.c_str(), RO_MODE);
+  bool enable = wcfg.getBool("auto_connect", true);
+  wcfg.end();
+  return enable;
+}
+
+String autoConnectStatus(){
+  return wcli.isAutoConnectEnable() ? "\033[0;32menable\033[0;37m" : "\033[0;31mdisable\033[0;37m";
+}
+
+void _nmcli_auto(char *args, Stream *response) {
+  int enable = wcli.parseEnableDisable(args);
+  if (enable == 1) {
+    response->println("enable auto connect in boot");
+    wcli.enableAutoConnect();
+  }
+  else if (enable == 0) {
+    response->println("disable auto connect in boot");
+    wcli.disableAutoConnect();
+  }
+  else {
+    response->println("invalid syntax: use\033[0;33m nmcli auto [enable|disable]\033[0m");
+    response->printf("auto connect is: %s\r\n", autoConnectStatus().c_str());
+  }
+}
+
 void ESP32WifiCLI::printNetworkHelp() {
   this->shell->attachCommander(&internal);
   this->shell->printHelp();
@@ -343,6 +382,7 @@ void _nmcli_status(char *args, Stream *response) {
   response->printf("RSSI signal \t: %03i\r\n",WiFi.RSSI());
   response->println("MAC Address\t: "+WiFi.macAddress());
   response->printf("Hostname \t: %s\r\n",WiFi.getHostname());
+  response->printf("Auto connect \t: %s\r\n",autoConnectStatus().c_str());
   #ifndef DISABLE_CLI_TELNET
   response->printf("Telnet status\t: %s\r\n",telnetStatus().c_str());
   #endif
@@ -379,8 +419,6 @@ void ESP32WifiCLI::setCallback(ESP32WifiCLICallbacks *pcb) { this->cb = pcb; }
 
 void ESP32WifiCLI::setSilentMode(bool silent) { this->silent = silent; }
 
-void ESP32WifiCLI::disableConnectInBoot() { this->connectInBoot = false; }
-
 void ESP32WifiCLI::setSSID(String ssid) { _setSSID(NULL, &Serial); }
 
 void ESP32WifiCLI::setPASW(String pasw) { _setPASW(NULL, &Serial); }
@@ -396,6 +434,8 @@ void ESP32WifiCLI::list() { loadSavedNetworks(false); }
 Pair<String, String> ESP32WifiCLI::parseCommand(String args) { return ParseCommand(args); }
 
 String ESP32WifiCLI::parseArgument(String args) { return ParseArgument(args); }
+
+int ESP32WifiCLI::parseEnableDisable(String args) { return ParseEnableDisable(args); }
 
 void ESP32WifiCLI::add(const char* command, void (*callback)(char *args, Stream *response), const char* description) {
   if (this->size_ >= WCLI_MAX_CMDS) return;
@@ -428,7 +468,7 @@ void ESP32WifiCLI::begin(String prompt_name, String app) {
   Serial.println("");
   loadSavedNetworks();
   loadAP(getDefaultAP());
-  if (connectInBoot) {
+  if (isAutoConnectEnable()) {
     reconnect();
     delay(10);
   }
@@ -449,6 +489,7 @@ void ESP32WifiCLI::begin(String prompt_name, String app) {
   wcli.addNetworkCommand("status", &_nmcli_status, "\tWiFi status information");
   wcli.addNetworkCommand("list", &_nmcli_list, "\t\tlist saved WiFi networks and its IDs");
   wcli.addNetworkCommand("mode", &_nmcli_mode, "\t\tset the default operation. modes: single|multi");
+  wcli.addNetworkCommand("auto", &_nmcli_auto, "\t\tenable/disable auto connect in boot");
   wcli.addNetworkCommand("select", &_nmcli_select, "\tselect the default AP by ID");
   wcli.addNetworkCommand("up", &_nmcli_up, "\t\tenable default WiFi");
   wcli.addNetworkCommand("down", &_nmcli_down, "\t\tdisconnect current WiFi");

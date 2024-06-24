@@ -123,8 +123,6 @@ void setup() {
   Serial.flush();        // Only for showing the message on serial
   delay(2000);           // Only for this demo
   wcli.setCallback(new mESP32WifiCLICallbacks());
-  // Disable WiFi connect in boot, you able to connect after setup with connect cmd.
-  wcli.disableConnectInBoot();
   wcli.setSilentMode(true);  // less debug output
 
   // Configure previously configured LED pins via CLI command
