@@ -48,8 +48,8 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
 /*********************************************************************
  * User defined commands. Example: suspend, blink, reboot, etc.
  ********************************************************************/
-void blink(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void blink(char *args, Stream *response) {
+  Pair<String, String> operands = wcli.parseCommand(args);
   int times = operands.first().toInt();
   int miliseconds = operands.second().toInt();
   for (int i = 0; i < times; i++) {
@@ -60,12 +60,12 @@ void blink(String opts) {
   }
 }
 
-void echo(String opts) {
-  String echo = maschinendeck::SerialTerminal::ParseArgument(opts);
+void echo(char *args, Stream *response) {
+  String echo = wcli.parseArgument(args);
   Serial.println("\r\nmsg: "+echo);
 }
 
-void reboot(String opts){
+void reboot(char *args, Stream *response){
   ESP.restart();
 }
 
@@ -75,11 +75,11 @@ void setup() {
   Serial.flush();
   delay(1000);
   wcli.setCallback(new mESP32WifiCLICallbacks());
-  wcli.begin();
   // User custom commands:
-  wcli.term->add("blink", &blink, "\tLED blink x times each x millis");
-  wcli.term->add("echo", &echo, "\tEcho the input message");
-  wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
+  wcli.add("blink", &blink, "\tLED blink x times each x millis");
+  wcli.add("echo", &echo, "\tEcho the input message");
+  wcli.add("reboot", &reboot, "\tperform a ESP32 reboot");
+  wcli.begin();
 }
 
 void loop() {
