@@ -113,6 +113,10 @@ void echo(char *args, Stream *response) {
   Serial.println(echo);
 }
 
+void info(char *args, Stream *response) {
+  wcli.status(response);
+}
+
 void reboot(char *args, Stream *response){
   wcli.shell->clear();
   ESP.restart();
@@ -132,6 +136,7 @@ void setup() {
   // Enter your custom commands:
   wcli.add("sleep", &sleep,     "\t\t<mode> <time> ESP32 sleep mode (deep/light)\r\n");
   wcli.add("echo", &echo,       "\t\t\"message\" Echo the msg. Parameter into quotes");
+  wcli.add("info", &info,       "\t\tsystem status info");
   wcli.add("setled", &setled,   "\t<PIN> config the LED GPIO for blink");
   wcli.add("blink", &blink,     "\t\t<times> <millis> LED blink x times each x millis");
   wcli.add("reboot", &reboot,   "\tperform a ESP32 reboot");
