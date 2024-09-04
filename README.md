@@ -132,11 +132,11 @@ The next projects are using `esp32-wifi-cli` library:
 
 ### CanAirIO - Air quality network
 
-![CanAirIO Community](https://raw.githubusercontent.com/kike-canaries/canairio_firmware/master/images/canairio_collage_community.jpg)
+[![CanAirIO Community](https://raw.githubusercontent.com/kike-canaries/canairio_firmware/master/images/canairio_collage_community.jpg)](https://github.com/kike-canaries/canairio_firmware?tab=readme-ov-file#readme)
 
 ### ICENav - ESP32 Based GPS Navigator
 
-![ICENav v3](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/icenav_shell_demo.png)
+[![ICENav v3](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/icenav_shell_demo.png)](https://github.com/jgauchia/IceNav-v3/?tab=readme-ov-file#readme)
 
 ## Credits
 
