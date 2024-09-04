@@ -50,7 +50,6 @@
   "license": "GPL-3.0-only",
   "dependencies":
   [
-    {"name":"SerialTerminal", "version":"https://github.com/hpsaturn/SerialTerminal.git"},
     {"name":"Shellminator","version": "https://github.com/hpsaturn/Shellminator.git"},
     {"name":"Commander-API","version": "https://github.com/hpsaturn/Commander-API.git#strcmp-fix"} 
   ]

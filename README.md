@@ -70,6 +70,20 @@ void setup() {
 
 For more details, please review the [M5Atom](examples/M5Atom/main.cpp) and [Advanced](examples/advanced/main.cpp) examples.
 
+## Global configuration
+
+The v0.3.x version uses Shellminator that needs some special build flags. Please add these in your build config, for instance in PlatformIO ini file:
+
+```python
+build_flags =
+  -D SHELLMINATOR_BUFF_LEN=70
+  -D SHELLMINATOR_BUFF_DIM=70
+  -D COMMANDER_MAX_COMMAND_SIZE=70
+  -D WCLI_MAX_CMDS=7 ; your custom commands count plus one
+```
+
+Be careful with the last flag `WCLI_MAX_CMDS` when you are adding more custom commands to your CLI, it should be n+1. Also you can check the [plaformio.ini](platformio.ini) file in this repo to see the configuration for the main example.
+
 ## PlatformIO install
 
 You able to install this library with pio pkg command:
@@ -80,7 +94,10 @@ Or add it in your ini file. Also you can compile here the examples with a simple
 
 ## Arduino IDE requirements
 
-This ESP32 CLI is based on the old SerialTerminal of @miko007. Please first download and use my fork that has some improvements: [SerialTerminal Library](https://github.com/hpsaturn/SerialTerminal)
+Because Arduino IDE is very bad to resolve dependencies, you need first download and install the next libraries dependencies:
+
+- [Shellminator](https://github.com/hpsaturn/Shellminator.git)
+- [Commander-API](https://github.com/hpsaturn/Commander-API.git#strcmp-fix)
 
 After that install ESP32 Wifi CLI library from this repo. Download it on [releases](https://github.com/hpsaturn/esp32-wifi-cli/releases).
 
