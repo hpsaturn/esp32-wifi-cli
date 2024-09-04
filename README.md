@@ -40,7 +40,7 @@ void loop() {
 
 This is a sample of the nmcli commands output:
 
-![nmcli preview commands](images/version2nmcli.jpg)
+![nmcli preview commands](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/version2nmcli.jpg)
 
 ## Custom parameters
 
@@ -101,6 +101,18 @@ Because Arduino IDE is very bad to resolve dependencies, you need first download
 
 After that install ESP32 Wifi CLI library from this repo. Download it on [releases](https://github.com/hpsaturn/esp32-wifi-cli/releases).
 
+## Changelog
+
+### v0.3.x
+
+![ESP32 nmcli CanAirIO demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_canairio_demo.gif)
+
+### v0.2.x
+
+![ESP32 Wifi CLI Blink demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_blink.gif)
+
+![ESP32 Wifi CLI Demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_demo.gif)
+
 ## Projects
 
 The next projects are using `esp32-wifi-cli` library:
@@ -124,19 +136,7 @@ The next projects are using `esp32-wifi-cli` library:
 
 ### ICENav - ESP32 Based GPS Navigator
 
-![ICENav v3](images/icenav_shell_demo.png)
-
-## Changelog
-
-### v0.3.x
-
-![ESP32 nmcli CanAirIO demo](images/esp32_wifi_cli_canairio_demo.gif)
-
-### v0.2.x
-
-![ESP32 Wifi CLI Blink demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_blink.gif)
-
-![ESP32 Wifi CLI Demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_demo.gif)
+![ICENav v3](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/icenav_shell_demo.png)
 
 ## Credits
 
