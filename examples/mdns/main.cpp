@@ -25,63 +25,75 @@
  * User defined commands
  ********************************************************************/
 
-void setHostname(String opts) {
-  String host = maschinendeck::SerialTerminal::ParseArgument(opts);
-  Serial.println(WiFi.localIP());
- 
+void setHostname(char *args, Stream *response) {
+  String host = wcli.parseArgument(args);
+  response->println(WiFi.localIP());
+  
+  if(host.length()==0){
+    response->printf("current hostname: %s\r\n", WiFi.getHostname());
+    response->println("invalid syntax! use: host \"hostname\"");
+    return;
+  }
   int attemp = 0;
   while(!MDNS.begin(host.c_str()) && attemp++ < 3) {
-     Serial.println("Starting mDNS...");
+     response->println("Starting mDNS...");
      delay(1000);
   }
-  Serial.println("MDNS started"); 
+  response->println("MDNS started"); 
+  response->printf("Try ping from other PC to %s.your_local_domain\r\n",host.c_str()); 
 }
 
-void getIpAddress(String opts) {
-  String host = maschinendeck::SerialTerminal::ParseArgument(opts);
-  Serial.printf("Resolving hostname: %s\r\n",host.c_str());
+void getIpAddress(char *args, Stream *response) {
+  String host = wcli.parseArgument(args);
+  response->printf("Resolving hostname: %s\r\n",host.c_str());
 
   while(mdns_init()!= ESP_OK){
     delay(1000);
-    Serial.println("Starting MDNS...");
+    response->println("Starting MDNS...");
   }
 
-  Serial.println("MDNS started");
+  response->println("MDNS started");
  
   IPAddress serverIp;
   int attemp = 0;
  
   while (serverIp.toString() == "0.0.0.0" && attemp++ < 5) {
-    Serial.println("Resolving host...");
+    response->println("Resolving host...");
     delay(250);
     serverIp = MDNS.queryHost(host.c_str(),3000);
   }
   if (serverIp.toString() != "0.0.0.0") {
-    Serial.println("Host address resolved:");
-    Serial.println(serverIp.toString());
+    response->println("Host address resolved:");
+    response->println(serverIp.toString());
   }
   else {
-    Serial.println("Host was not found!");
+    response->println("Host was not found!");
   }
 }
 
-void reboot(String opts){
+void reboot(char *args, Stream *response){
   ESP.restart();
+}
+
+void info(char *args, Stream *response) {
+  wcli.status(response);
 }
 
 void setup() {
   Serial.begin(115200); // Optional, you can init it on begin()
   Serial.flush();       // Only for showing the message on serial 
   delay(1000);
+
   // wcli.disableConnectInBoot();
-  // wcli.setSilentMode(true);
+  // wcli.setSilentMode(false);
   // wcli.clearSettings(); // Clear all networks and settings
-  wcli.begin();         // Alternatively, you can init with begin(115200) 
 
   // Enter your custom commands:
-  wcli.term->add("host", &setHostname, "\t<hostname> set hostname into quotes");
-  wcli.term->add("getIp", &getIpAddress, "\t<hostname> get IP address of hostname into quotes");
-  wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
+  wcli.add("host", &setHostname,   "\t\t<hostname> set hostname into quotes");
+  wcli.add("getIP", &getIpAddress, "\t\t<hostname> get IP address of hostname into quotes");
+  wcli.add("info", &info,          "\t\tsystem status info");
+  wcli.add("reboot", &reboot,      "\tperform a ESP32 reboot");
+  wcli.begin();         // Alternatively, you can init with begin(115200) 
 }
 
 void loop() {

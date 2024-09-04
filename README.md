@@ -1,27 +1,24 @@
 [![PlatformIO](https://github.com/hpsaturn/esp32-wifi-cli/workflows/PlatformIO/badge.svg)](https://github.com/hpsaturn/esp32-wifi-cli/actions/) ![ViewCount](https://views.whatilearened.today/views/github/hpsaturn/esp32-wifi-cli.svg)
 
-# esp32-wifi-cli
+# esp32-nmcli
 
-Basic and extendible Wifi CLI manager via serial command line for ESP32
-
-## Demo
-
-![ESP32 Wifi CLI Demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_demo.gif)
+Basic and extendible Wifi network manager CLI via serial command line for ESP32
 
 ## Features
 
-- [x] interactive serial terminal, prompt and backspace support
-- [x] extendible: custom user commands and also the help menu
+- [x] Network manager nmcli command (connect, up, down, scan, list, etc)
 - [x] Wifi multi AP and single AP modes
+- [x] **New Telnet service** for remote shell via IP and port
+- [x] **New shell improved** & migrated to Shellminator development
+- [x] **New interactive shell**, autocomplete, history, prompt, logo and others
+- [x] extendible custom user commands
 - [x] preferences persist in flash ROM
 - [x] two parsers: Argument into quotes or two parameters without quotes
 - [x] debug messages mode off (new silent mode)
 - [x] disable auto connect in the boot
-- [x] extend the CLI events callbacks (see examples)
-- [x] esp8266 support
 - [x] esp32c3, esp32s3 support
-- [x] launch terminal in setup (example)
-- [ ] improve VT100 compatibility (some minor issues on some terminals)
+- [x] VT100 compatibility
+- [ ] esp8266 support
 
 ## Basic implementation
 
@@ -32,7 +29,6 @@ Basic and extendible Wifi CLI manager via serial command line for ESP32
 void setup() {
   Serial.begin(115200);  // set here the Serial baudrate or in
   wcli.begin();          // the begin method like a parameter
-  delay(100);
 }
 
 void loop() {
@@ -40,53 +36,68 @@ void loop() {
 }
 ```
 
-Output
+## Network manager commands
 
-```bash
-SerialTerm v1.1.2
-(C) 2022, MikO - Hpsaturn
-  available commands:
-        help            show detail usage information
-        setSSID         set the Wifi SSID
-        setPASW         set the WiFi password
-        connect         save and connect to WiFi network
-        list            list saved WiFi networks
-        select          select the default AP (default: last)
-        mode            set the default operation single/multi AP (slow)
-        scan            scan WiFi networks
-        status          WiFi status information
-        disconnect      WiFi disconnect
-        delete          remove saved WiFi network by SSID
+This is a sample of the nmcli commands output:
 
-st>
-```
+![nmcli preview commands](images/version2nmcli.jpg)
 
 ## Custom parameters
 
-You can extend the available commands adding new ones in the setup, like these:
+For instance you can extend the available commands adding new ones in the setup, also add your prompt name and custom logo, like this example:
 
 ```cpp
-wcli.begin();
-wcli.term->add("blink", &blink, "\tLED blink x times each x millis");
-wcli.term->add("echo", &echo, "\tEcho the input message");
-wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
+void setup() {
+  Serial.begin(115200);  // Optional, you can init it on begin()
+  Serial.flush();        // Only for showing the message on serial
+  
+  wcli.setCallback(new mESP32WifiCLICallbacks());
+  wcli.setSilentMode(true);  // less debug output
+
+  // Custom commands:
+  wcli.add("sleep", &sleep,     "\t\t<mode> <time> ESP32 sleep mode (deep/light)\r\n");
+  wcli.add("echo", &echo,       "\t\t\"message\" Echo the msg. Parameter into quotes");
+  wcli.add("info", &info,       "\t\tsystem status info");
+  wcli.add("setled", &setled,   "\t<PIN> config the LED GPIO for blink");
+  wcli.add("blink", &blink,     "\t\t<times> <millis> LED blink x times each x millis");
+  wcli.add("reboot", &reboot,   "\tperform a ESP32 reboot");
+  
+  wcli.shell->attachLogo(logo);
+  wcli.shell->clear();
+  wcli.begin("CanAirIO"); // your prompt custom name
+}
 ```
 
 For more details, please review the [M5Atom](examples/M5Atom/main.cpp) and [Advanced](examples/advanced/main.cpp) examples.
 
-![ESP32 Wifi CLI Blink demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_blink.gif)
+## Global configuration
+
+The v0.3.x version uses Shellminator that needs some special build flags. Please add these in your build config, for instance in PlatformIO ini file:
+
+```python
+build_flags =
+  -D SHELLMINATOR_BUFF_LEN=70
+  -D SHELLMINATOR_BUFF_DIM=70
+  -D COMMANDER_MAX_COMMAND_SIZE=70
+  -D WCLI_MAX_CMDS=7 ; your custom commands count plus one
+```
+
+Be careful with the last flag `WCLI_MAX_CMDS` when you are adding more custom commands to your CLI, it should be n+1. Also you can check the [plaformio.ini](platformio.ini) file in this repo to see the configuration for the main example.
 
 ## PlatformIO install
 
 You able to install this library with pio pkg command:
 
-`pio pkg install --library "hpsaturn/ESP32 Wifi CLI @^0.2.1"`
+`pio pkg install --library "hpsaturn/ESP32 Wifi CLI @^0.3.0"`
 
 Or add it in your ini file. Also you can compile here the examples with a simple `pio run` over root of this repo.
 
 ## Arduino IDE requirements
 
-This ESP32 CLI is based on the old SerialTerminal of @miko007. Please first download and use my fork that has some improvements: [SerialTerminal Library](https://github.com/hpsaturn/SerialTerminal)
+Because Arduino IDE is very bad to resolve dependencies, you need first download and install the next libraries dependencies:
+
+- [Shellminator](https://github.com/hpsaturn/Shellminator.git)
+- [Commander-API](https://github.com/hpsaturn/Commander-API.git#strcmp-fix)
 
 After that install ESP32 Wifi CLI library from this repo. Download it on [releases](https://github.com/hpsaturn/esp32-wifi-cli/releases).
 
@@ -111,6 +122,24 @@ The next projects are using `esp32-wifi-cli` library:
 
 ![CanAirIO Community](https://raw.githubusercontent.com/kike-canaries/canairio_firmware/master/images/canairio_collage_community.jpg)
 
+### ICENav - ESP32 Based GPS Navigator
+
+![ICENav v3](images/icenav_shell_demo.png)
+
+## Changelog
+
+### v0.3.x
+
+![ESP32 nmcli CanAirIO demo](images/esp32_wifi_cli_canairio_demo.gif)
+
+### v0.2.x
+
+![ESP32 Wifi CLI Blink demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_blink.gif)
+
+![ESP32 Wifi CLI Demo](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/esp32_wifi_cli_demo.gif)
+
 ## Credits
 
-Extended from [SerialTerminal](https://github.com/miko007/SerialTerminal) by @miko007
+v0.3.x Extended and using [Shellminator](https://www.shellminator.org/html/index.html) by [Daniel Hajnal](https://github.com/dani007200964)
+
+v0.2.x Extended from [SerialTerminal](https://github.com/miko007/SerialTerminal) by [Michael Ochmann](https://github.com/miko007)
