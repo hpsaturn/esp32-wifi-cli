@@ -472,6 +472,10 @@ void ESP32WifiCLI::begin(String prompt_name, String app) {
     reconnect();
     delay(10);
   }
+  else{
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+  }
 
   // main command for the base commander:
   wcli.add("nmcli", &_nmcli, "\t\tnetwork manager CLI. Type nmcli help for more info");
