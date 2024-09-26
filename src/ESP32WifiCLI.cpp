@@ -282,6 +282,7 @@ void ESP32WifiCLI::printNetworkHelp() {
 }
 
 void _nmcli_scan(char *args, Stream *response) {
+  wcli.radioOn();
   int n = WiFi.scanNetworks();
   response->print("\nscan done: ");
   if (n == 0) {
@@ -338,6 +339,7 @@ void _nmcli_up(char *args, Stream *response) {
     }
     if (wcli.isSSIDSaved(temp_ssid)) {
       wcli.wifiAPConnect(false);
+      if (wcli.isTelnetEnable() && !wcli.isTelnetRunning()) wcli.enableTelnet();
       return;
     } else {
       wcli.wifiAPConnect(true);
@@ -345,6 +347,7 @@ void _nmcli_up(char *args, Stream *response) {
   } else {
     wcli.multiWiFiConnect();
   }
+  if (wcli.isTelnetEnable() && !wcli.isTelnetRunning()) wcli.enableTelnet();
 }
 
 void _nmcli_connect(char *args, Stream *response) {
@@ -459,22 +462,31 @@ void ESP32WifiCLI::addNetworkCommand(const char* command, void (*callback)(char 
   this->isize_++;
 }
 
+void ESP32WifiCLI::radioOff(){
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+}
+
+void ESP32WifiCLI::radioOn(){
+  WiFi.mode(WIFI_STA);
+}
+
 void ESP32WifiCLI::begin(String prompt_name, String app) {
   app_name = app.length() == 0 ? "wifi_cli_prefs" : app;
   prompt = prompt_name;
-  WiFi.mode(WIFI_STA);
   Serial.flush();
   delay(10);
   Serial.println("");
   loadSavedNetworks();
   loadAP(getDefaultAP());
   if (isAutoConnectEnable()) {
+    log_i("reconnecting..");
+    radioOn();
     reconnect();
     delay(10);
-  }
-  else{
-    WiFi.disconnect(true);
-    WiFi.mode(WIFI_OFF);
+  } else {
+    log_i("turning radio off..");
+    radioOff();
   }
 
   // main command for the base commander:

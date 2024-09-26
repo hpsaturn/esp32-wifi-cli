@@ -6,6 +6,8 @@ WiFiServer server( WCLI_SERVER_PORT );
 Shellminator shellTelnet_( &server );
 TaskHandle_t telnet_handle = NULL;
 
+bool isServerEnable = false;
+
 void initClientSession(const char * prompt, bool &init) {
   if(init) return;
   Serial.println("Telnet server ready.");
@@ -25,14 +27,16 @@ void telnetClientTask(void *parameter) {
   }
 }
 
-void startTelnet() {
-  if (telnet_handle != NULL) return;
+bool startTelnet() {
+  if (!WiFi.isConnected()) return false;
+  if (telnet_handle != NULL ) return true;
   wcli.shellTelnet = &shellTelnet_;
   wcli.shellTelnet->attachCommander(&wcli.commander);
   wcli.shellTelnet->attachLogo(logo_wcli);
   wcli.shellTelnet->beginServer();
   server.begin();
   xTaskCreate(telnetClientTask, "Telnet Task", 10000, (void *)wcli.prompt.c_str(), 5, &telnet_handle);
+  return true;
 }
 
 void stopTelnet() {
@@ -66,9 +70,9 @@ void _nmcli_telnet(char *args, Stream *response) {
 }
 
 void ESP32WifiCLI::enableTelnet() {
-  startTelnet();
+  isServerEnable = startTelnet();
   wcfg.begin(app_name.c_str(), RW_MODE);
-  wcfg.putBool("telnet_enable",true);
+  wcfg.putBool("telnet_enable", true);
   wcfg.end();
 }
 
@@ -84,5 +88,9 @@ bool ESP32WifiCLI::isTelnetEnable() {
   bool enable = wcfg.getBool("telnet_enable", false);
   wcfg.end();
   return enable;
+}
+
+bool ESP32WifiCLI::isTelnetRunning() {
+  return isServerEnable;  
 }
 #endif
