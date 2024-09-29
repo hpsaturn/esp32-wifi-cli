@@ -67,7 +67,7 @@ void reboot(char *args, Stream *response){
 }
 
 void initRemoteShell(){
-  if (wcli.isTelnetEnable()) wcli.shellTelnet->attachLogo(logo);
+  if (wcli.isTelnetRunning()) wcli.shellTelnet->attachLogo(logo);
 }
 
 void initSerialShell(){

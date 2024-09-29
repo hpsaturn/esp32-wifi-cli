@@ -68,9 +68,12 @@ class ESP32WifiCLI {
   void enableTelnet();
   void disableTelnet();
   bool isTelnetEnable();
+  bool isTelnetRunning();
   void disableAutoConnect();
   void enableAutoConnect();
   bool isAutoConnectEnable();
+  void radioOn();
+  void radioOff();
   void scan();
   void setSSID(String ssid);
   void setPASW(String pasw);
