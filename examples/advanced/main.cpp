@@ -20,8 +20,12 @@
 
 #include <ESP32WifiCLI.hpp>
 
-int LED_PIN = 13;
-
+int LED_PIN = 13; // change it via CLI using this example :D
+                  // for instance if you are using a LilyGO T7 v1.5 board,
+                  // set LED like this:
+                  //   setled 19
+                  // and the reboot with the command reboot.
+                  // Also the LED could be ON when the WiFi is ready.
 
 const char logo[] =
 "▓█████ ▒██   ██▒ ▄▄▄       ███▄ ▄███▓ ██▓███   ██▓    ▓█████ \n"
@@ -57,7 +61,7 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
 };
 
 /*********************************************************************
- * User defined commands. Example: suspend, blink, reboot, etc.
+ * User defined commands sectioh. Examples: suspend, blink, reboot, etc.
  ********************************************************************/
 void gotToSuspend(int type, int seconds) {
     delay(8);  // waiting for writing msg on serial
@@ -99,7 +103,7 @@ void setled(char *args, Stream *response) {
   Pair<String, String> operands = wcli.parseCommand(args);
   int pin = operands.first().toInt();
   if(pin >= 0 && pin <= 31) {
-    wcli.setInt("LED_PIN", pin);
+    wcli.setInt("KEY_LED_PIN", pin);
     Serial.println("\r\nLED GPIO set to " + String(pin));
     Serial.println("Please reboot to apply the change.");
   }
@@ -128,11 +132,7 @@ void setup() {
   delay(2000);           // Only for this demo
   wcli.setCallback(new mESP32WifiCLICallbacks());
   wcli.setSilentMode(true);  // less debug output
-
-  // Configure previously configured LED pins via CLI command
-  int LED_PIN = wcli.getInt("LED_PIN", LED_PIN);
-  pinMode(LED_PIN, OUTPUT);
-
+  
   // Enter your custom commands:
   wcli.add("sleep", &sleep,     "\t\t<mode> <time> ESP32 sleep mode (deep/light)\r\n");
   wcli.add("echo", &echo,       "\t\t\"message\" Echo the msg. Parameter into quotes");
@@ -144,6 +144,10 @@ void setup() {
   wcli.shell->attachLogo(logo);
   wcli.shell->clear();
   wcli.begin();  // Alternatively, you can init with begin(115200,appname)
+
+  // Configure previously configured LED pins via CLI command
+  LED_PIN = (int) wcli.getInt("KEY_LED_PIN", LED_PIN);
+  pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
