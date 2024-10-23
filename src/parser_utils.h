@@ -46,7 +46,6 @@ static int ParseEnableDisable(String args) {
   Pair<String, String> operands = ParseCommand(args);
   String param = operands.first();
   param.toUpperCase();
-  bool enable;
   if (param.equals("ENABLE"))
     return 1;
   else if (param.equals("DISABLE"))

@@ -137,7 +137,7 @@ void setup() {
   wcli.add("sleep", &sleep,     "\t\t<mode> <time> ESP32 sleep mode (deep/light)\r\n");
   wcli.add("echo", &echo,       "\t\t\"message\" Echo the msg. Parameter into quotes");
   wcli.add("info", &info,       "\t\tsystem status info");
-  wcli.add("setled", &setled,   "\t<PIN> config the LED GPIO for blink");
+  wcli.add("setled", &setled,   "\t<PIN> config the LED GPIO pin");
   wcli.add("blink", &blink,     "\t\t<times> <millis> LED blink x times each x millis");
   wcli.add("reboot", &reboot,   "\tperform a ESP32 reboot");
   
