@@ -111,7 +111,7 @@ Or add it in your ini file. Also you can compile here the examples with a simple
 Because Arduino IDE is very bad to resolve dependencies, you need first download and install the next libraries dependencies:
 
 - [Shellminator](https://github.com/hpsaturn/Shellminator.git)
-- [Commander-API](https://github.com/hpsaturn/Commander-API.git#strcmp-fix)
+- [Commander-API](https://github.com/hpsaturn/Commander-API.git)
 
 After that install ESP32 Wifi CLI library from this repo. Download it on [releases](https://github.com/hpsaturn/esp32-wifi-cli/releases).
 
