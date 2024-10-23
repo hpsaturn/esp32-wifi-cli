@@ -22,27 +22,23 @@
 #include <M5Atom.h>
 #include <ESP32WifiCLI.hpp>
 
+bool set_color = false;
+
 /*********************************************************************
  * Optional callback.
  ********************************************************************/
 class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   void onWifiStatus(bool isConnected) {
-    M5.dis.setBrightness(5);     // set brightness to 50%
-    if (isConnected)
-      M5.dis.fillpix(0x00ff00);  // set LED to green
-    else
-      M5.dis.fillpix(0xffff00);  // set LED to yellow
+    M5.dis.setBrightness(5);  // set brightness to 50%
+    if (!set_color) {         // when you set a color stop wifi notification
+      if (isConnected)
+        M5.dis.fillpix(0x00ff00);  // set LED to green
+      else
+        M5.dis.fillpix(0xffff00);  // set LED to yellow
+    }
   }
-
-  // Callback for extend the help menu.
-  void onHelpShow() {
-    Serial.println("\r\nCustom commands:\r\n");
-    Serial.println("blink <times> <millis>\tLED blink x times each x millis");
-    Serial.println("echo \"message\"\t\tEcho the input message");
-    Serial.println("reboot\t\t\tperform a soft ESP32 reboot");
-  }
-  void onNewWifi(String ssid, String passw) {
-  }
+  void onHelpShow() {}
+  void onNewWifi(String ssid, String passw) {}
 };
 
 /*********************************************************************
@@ -58,6 +54,17 @@ void blink(char *args, Stream *response) {
     M5.dis.fillpix(0xff0000);  // set LED to green
     delay(miliseconds);
   }
+}
+
+void color(char *args, Stream *response){
+  String hexcolor = wcli.parseArgument(args);
+  set_color = true;
+  int red;
+  int green;
+  int blue;
+  sscanf(hexcolor.c_str(), "%i %i %i", &red, &green, &blue);
+  M5.dis.setBrightness(20);  
+  M5.dis.fillpix(CRGB().setRGB(red, green, blue));
 }
 
 void echo(char *args, Stream *response) {
@@ -76,8 +83,9 @@ void setup() {
   delay(1000);
   wcli.setCallback(new mESP32WifiCLICallbacks());
   // User custom commands:
-  wcli.add("blink", &blink, "\tLED blink x times each x millis");
-  wcli.add("echo", &echo, "\tEcho the input message");
+  wcli.add("blink", &blink, "\t\tLED blink x times each x millis");
+  wcli.add("echo", &echo, "\t\tEcho message into quotes");
+  wcli.add("color", &color, "\t\tset color into quotes: i.e \"255 128 0\"");
   wcli.add("reboot", &reboot, "\tperform a ESP32 reboot");
   wcli.begin();
 }
