@@ -42,6 +42,20 @@ This is a sample of the nmcli commands output:
 
 ![nmcli preview commands](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/version2nmcli.jpg)
 
+### nmcli connect
+
+For instance for setup a new connection:
+
+```bash
+nmcli connect Your SSID password "Your Password"
+```
+
+Note that you could enter your ssid with spaces but without quotes, and your password with spaces but into quotes.
+
+### nmcli tips
+
+nmcli support many WiFi networks, and you are able to list those with `nmcli list`, also select your WiFi network default with `nmcli select #` where # is the number or ID of each WiFi network listed with `list` command. Also, you could enable multi network with `nmcli mode multi`, that means that the device will try to detect what WiFi network is available, or force with `nmcli mode single` to use only your WiFi network default.
+
 ## Custom parameters
 
 For instance you can extend the available commands adding new ones in the setup, also add your prompt name and custom logo, like this example:
@@ -88,7 +102,7 @@ Be careful with the last flag `WCLI_MAX_CMDS` when you are adding more custom co
 
 You able to install this library with pio pkg command:
 
-`pio pkg install --library "hpsaturn/ESP32 Wifi CLI @^0.3.0"`
+`pio pkg install --library "hpsaturn/ESP32 Wifi CLI @^0.3.2"`
 
 Or add it in your ini file. Also you can compile here the examples with a simple `pio run` over root of this repo.
 
