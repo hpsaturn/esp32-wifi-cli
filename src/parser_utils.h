@@ -25,7 +25,7 @@ static Pair<String, String> ParseCommand(String message) {
   return Pair<String, String>(keyword, message);
 }
 
-static String ParseArgument(String message) {
+static inline String ParseArgument(String message) {
   String keyword = "";
   for (auto& car : message) {
     if (car == '"') break;
@@ -42,11 +42,10 @@ static String ParseArgument(String message) {
   return message;
 }
 
-static int ParseEnableDisable(String args) {
+static inline int ParseEnableDisable(String args) {
   Pair<String, String> operands = ParseCommand(args);
   String param = operands.first();
   param.toUpperCase();
-  bool enable;
   if (param.equals("ENABLE"))
     return 1;
   else if (param.equals("DISABLE"))
@@ -55,7 +54,7 @@ static int ParseEnableDisable(String args) {
     return -1;
 }
 
-static bool extract_connect_parames(const char* args, char** ssid, char** password, Stream *response) {
+static inline bool extract_connect_parames(const char* args, char** ssid, char** password, Stream *response) {
     const char* password_prefix = " password ";
 
     // Find the " password " prefix

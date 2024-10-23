@@ -19,7 +19,7 @@ void ESP32WifiCLI::printHelp() {
   this->shell->printHelp();
 }
 
-String ESP32WifiCLI::getNetKeyName(int net) {
+String ESP32WifiCLI::getNetKeyName(uint8_t net) {
   if (net > 99) return "";
   char key[11];
   sprintf(key, "key_net%02d", net);
