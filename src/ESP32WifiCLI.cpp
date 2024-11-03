@@ -123,6 +123,10 @@ bool ESP32WifiCLI::wifiValidation() {
   }
 }
 
+/**
+ * @brief Main method for save and connect to a WiFi network
+ * @param save if is true save the network, false only connect
+ */
 void ESP32WifiCLI::wifiAPConnect(bool save) {
   if (temp_ssid.length() == 0) {
     Serial.println("\nSSID is empty, please set a valid SSID into quotes\n");
@@ -326,7 +330,6 @@ void _nmcli_down(char *args, Stream *response) {
 void _nmcli_up(char *args, Stream *response) {
   if (WiFi.status() == WL_CONNECTED && temp_ssid == WiFi.SSID()) {
     response->println("\nWiFi is already connected");
-    
     return;
   } else if (WiFi.status() == WL_CONNECTED) {
     _nmcli_down(args, response);
@@ -472,7 +475,7 @@ void ESP32WifiCLI::radioOn(){
 }
 
 void ESP32WifiCLI::begin(String prompt_name, String app) {
-  app_name = app.length() == 0 ? "wifi_cli_prefs" : app;
+  app_name = app.length() == 0 ? app_name : app;
   prompt = prompt_name;
   Serial.flush();
   delay(10);
