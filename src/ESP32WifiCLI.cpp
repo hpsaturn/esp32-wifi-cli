@@ -114,11 +114,11 @@ bool ESP32WifiCLI::isSSIDSaved(String ssid) {
 
 bool ESP32WifiCLI::wifiValidation() {
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("connected!");
-    if(!silent) status();
+    if (!silent) Serial.println("connected!");
+    if (!silent) status();
     return true;
   } else {
-    Serial.println("connection failed!");
+    if (!silent) Serial.println("connection failed!");
     return false;
   }
 }
@@ -132,7 +132,7 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
     Serial.println("\nSSID is empty, please set a valid SSID into quotes\n");
     return;
   }
-  Serial.print("\nConnecting to " + temp_ssid + "...");
+  if (!silent) Serial.print("\nConnecting to " + temp_ssid + "...");
   if (save) {
     wifiMulti.addAP(temp_ssid.c_str(), temp_pasw.c_str());
   }
@@ -145,7 +145,7 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
 
   while (WiFi.status() != WL_CONNECTED && retry++ < 20) {  // M5Atom will connect automatically
     delay(1000);
-    Serial.print(".");
+    if (!silent) Serial.print(".");
   }
   delay(100);
   if (wifiValidation() && save) {
@@ -217,10 +217,10 @@ void ESP32WifiCLI::setMode(String mode, Stream *response) {
 
 void ESP32WifiCLI::multiWiFiConnect() {
   int retry = 0;
-  Serial.print("\nConnecting in MultiAP mode..");
+  if (!silent) Serial.print("\nConnecting in MultiAP mode..");
   while (wifiMulti.run(connectTimeoutMs) != WL_CONNECTED && retry++ < 10) {
     delay(500);
-    Serial.print(".");
+    if (!silent) Serial.print(".");
   }
   wifiValidation();
 }
