@@ -16,8 +16,8 @@
 #define RW_MODE false
 #define RO_MODE true
 
-#define ESP32WIFICLI_VERSION "0.3.2"
-#define ESP32WIFICLI_REVISION 046
+#define ESP32WIFICLI_VERSION "0.3.3"
+#define ESP32WIFICLI_REVISION 047
 
 #ifndef WCLI_MAX_CMDS
 #define WCLI_MAX_CMDS 15 // user and public commands
@@ -106,7 +106,7 @@ class ESP32WifiCLI {
   void setCallback(ESP32WifiCLICallbacks* pcb);
 
  private:
-  String app_name;
+  String app_name = "wifi_cli_prefs";
   int size_ = 0;
   int isize_ = 0;
 

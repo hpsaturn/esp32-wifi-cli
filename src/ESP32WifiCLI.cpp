@@ -114,21 +114,25 @@ bool ESP32WifiCLI::isSSIDSaved(String ssid) {
 
 bool ESP32WifiCLI::wifiValidation() {
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("connected!");
-    if(!silent) status();
+    if (!silent) Serial.println("connected!");
+    if (!silent) status();
     return true;
   } else {
-    Serial.println("connection failed!");
+    if (!silent) Serial.println("connection failed!");
     return false;
   }
 }
 
+/**
+ * @brief Main method for save and connect to a WiFi network
+ * @param save if is true save the network, false only connect
+ */
 void ESP32WifiCLI::wifiAPConnect(bool save) {
   if (temp_ssid.length() == 0) {
     Serial.println("\nSSID is empty, please set a valid SSID into quotes\n");
     return;
   }
-  Serial.print("\nConnecting to " + temp_ssid + "...");
+  if (!silent) Serial.print("\nConnecting to " + temp_ssid + "...");
   if (save) {
     wifiMulti.addAP(temp_ssid.c_str(), temp_pasw.c_str());
   }
@@ -141,7 +145,7 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
 
   while (WiFi.status() != WL_CONNECTED && retry++ < 20) {  // M5Atom will connect automatically
     delay(1000);
-    Serial.print(".");
+    if (!silent) Serial.print(".");
   }
   delay(100);
   if (wifiValidation() && save) {
@@ -213,10 +217,10 @@ void ESP32WifiCLI::setMode(String mode, Stream *response) {
 
 void ESP32WifiCLI::multiWiFiConnect() {
   int retry = 0;
-  Serial.print("\nConnecting in MultiAP mode..");
+  if (!silent) Serial.print("\nConnecting in MultiAP mode..");
   while (wifiMulti.run(connectTimeoutMs) != WL_CONNECTED && retry++ < 10) {
     delay(500);
-    Serial.print(".");
+    if (!silent) Serial.print(".");
   }
   wifiValidation();
 }
@@ -326,7 +330,6 @@ void _nmcli_down(char *args, Stream *response) {
 void _nmcli_up(char *args, Stream *response) {
   if (WiFi.status() == WL_CONNECTED && temp_ssid == WiFi.SSID()) {
     response->println("\nWiFi is already connected");
-    
     return;
   } else if (WiFi.status() == WL_CONNECTED) {
     _nmcli_down(args, response);
@@ -472,7 +475,7 @@ void ESP32WifiCLI::radioOn(){
 }
 
 void ESP32WifiCLI::begin(String prompt_name, String app) {
-  app_name = app.length() == 0 ? "wifi_cli_prefs" : app;
+  app_name = app.length() == 0 ? app_name : app;
   prompt = prompt_name;
   Serial.flush();
   delay(10);

@@ -84,7 +84,6 @@ void setup() {
   Serial.flush();       // Only for showing the message on serial 
   delay(1000);
 
-  // wcli.disableConnectInBoot();
   // wcli.setSilentMode(false);
   // wcli.clearSettings(); // Clear all networks and settings
 
@@ -93,7 +92,7 @@ void setup() {
   wcli.add("getIP", &getIpAddress, "\t\t<hostname> get IP address of hostname into quotes");
   wcli.add("info", &info,          "\t\tsystem status info");
   wcli.add("reboot", &reboot,      "\tperform a ESP32 reboot");
-  wcli.begin();         // Alternatively, you can init with begin(115200) 
+  wcli.begin();
 }
 
 void loop() {

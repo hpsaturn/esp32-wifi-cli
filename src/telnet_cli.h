@@ -9,8 +9,8 @@ TaskHandle_t telnet_handle = NULL;
 bool isServerEnable = false;
 
 void initClientSession(const char * prompt, bool &init) {
-  if(init) return;
-  Serial.println("Telnet server ready.");
+  if (init) return;
+  if (!wcli.silent) Serial.println("Telnet server ready.");
   shellTelnet_.clear();
   shellTelnet_.begin(prompt);
   shellTelnet_.update();

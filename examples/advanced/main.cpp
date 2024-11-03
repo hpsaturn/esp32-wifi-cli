@@ -132,6 +132,7 @@ void setup() {
   delay(2000);           // Only for this demo
   wcli.setCallback(new mESP32WifiCLICallbacks());
   wcli.setSilentMode(true);  // less debug output
+  // wcli.clearSettings(); // Clear all networks and settings
   
   // Enter your custom commands:
   wcli.add("sleep", &sleep,     "\t\t<mode> <time> ESP32 sleep mode (deep/light)\r\n");

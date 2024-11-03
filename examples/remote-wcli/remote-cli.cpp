@@ -71,13 +71,14 @@ void initRemoteShell(){
 }
 
 void initSerialShell(){
+  wcli.setSilentMode(true);  // less debug output, change to false for details
   // Enter your custom commands:
   wcli.add("sum", &sum,         "\t\t<int> <int> calculate the sum into two numbers\r\n");
   wcli.add("echo", &echo,       "\t\t\"message\" example of echo of a message into quotes");
   wcli.add("info", &info,       "\t\tsystem status info");
   wcli.add("reboot", &reboot,   "\tperform a ESP32 reboot");
   wcli.shell->attachLogo(logo);
-  wcli.begin();  // Alternatively, you can init with begin(115200,appname)
+  wcli.begin();
 }
 
 void setup() {
@@ -85,8 +86,6 @@ void setup() {
   Serial.flush();        // Only for showing the message on serial
   delay(2000);           // Only for this demo
   
-  wcli.setSilentMode(true);  // less debug output
- 
   initSerialShell();
   initRemoteShell();  
 }
