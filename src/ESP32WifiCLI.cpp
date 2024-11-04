@@ -120,7 +120,7 @@ bool ESP32WifiCLI::wifiValidation() {
     if (!silent) status();
     return true;
   } else {
-    Serial.println("connection failed!");
+    Serial.println(" connection failed!");
     return false;
   }
 }
@@ -282,6 +282,19 @@ String autoConnectStatus(){
   return wcli.isAutoConnectEnable() ? "\033[0;32menable\033[0;37m" : "\033[0;31mdisable\033[0;37m";
 }
 
+void ESP32WifiCLI::printNetworkHelp() {
+  this->shell->attachCommander(&internal);
+  this->shell->printHelp();
+  this->shell->attachCommander(&commander);
+
+#ifndef DISABLE_CLI_TELNET
+  if (shellTelnet == nullptr) return;
+  this->shellTelnet->attachCommander(&internal);
+  this->shellTelnet->printHelp();
+  this->shellTelnet->attachCommander(&commander);
+#endif
+}
+
 void _nmcli_auto(char *args, Stream *response) {
   int enable = wcli.parseEnableDisable(args);
   if (enable == 1) {
@@ -296,19 +309,6 @@ void _nmcli_auto(char *args, Stream *response) {
     response->println("invalid syntax: use\033[0;33m nmcli auto [enable|disable]\033[0m");
     response->printf("auto connect is: %s\r\n", autoConnectStatus().c_str());
   }
-}
-
-void ESP32WifiCLI::printNetworkHelp() {
-  this->shell->attachCommander(&internal);
-  this->shell->printHelp();
-  this->shell->attachCommander(&commander);
-
-#ifndef DISABLE_CLI_TELNET
-  if (shellTelnet == nullptr) return;
-  this->shellTelnet->attachCommander(&internal);
-  this->shellTelnet->printHelp();
-  this->shellTelnet->attachCommander(&commander);
-#endif
 }
 
 void _nmcli_scan(char *args, Stream *response) {
@@ -332,20 +332,18 @@ void _nmcli_help(char* args, Stream *response) {
   wcli.printNetworkHelp();
 }
 
-void _setSSID(char *args, Stream *response) {
-  String ssid = ParseArgument(args);
+void ESP32WifiCLI::setSSID(String ssid) {  
   if (ssid.length() == 0) {
-    response->println("\nSSID is empty, please set a valid SSID into quotes");
+    Serial.println("\nSSID is empty, please set a valid SSID into quotes");
   } else {
     temp_ssid = ssid;
-    if (!wcli.silent) response->println("set ssid to: " + temp_ssid);
+    if (!wcli.silent) Serial.println("set ssid to: " + temp_ssid);
   }
 }
 
-void _setPASW(char *args, Stream *response) {
-  String pasw = ParseArgument(args);
+void ESP32WifiCLI::setPASW(String pasw) {  
   temp_pasw = pasw;
-  if (!wcli.silent) response->println("set password to: " + temp_pasw);
+  if (!wcli.silent) Serial.println("set password to: " + temp_pasw);
 }
 
 void _nmcli_down(char *args, Stream *response) {
@@ -450,10 +448,6 @@ void ESP32WifiCLI::connect() { _nmcli_up(NULL, &Serial); }
 void ESP32WifiCLI::setCallback(ESP32WifiCLICallbacks *pcb) { this->cb = pcb; }
 
 void ESP32WifiCLI::setSilentMode(bool silent) { this->silent = silent; }
-
-void ESP32WifiCLI::setSSID(String ssid) { _setSSID((char*)(String("\""+ssid+"\"").c_str()), &Serial); }
-
-void ESP32WifiCLI::setPASW(String pasw) { _setPASW((char*)(String("\""+pasw+"\"").c_str()), &Serial); }
 
 void ESP32WifiCLI::disconnect() { _nmcli_down(NULL, &Serial); }
 
