@@ -9,6 +9,7 @@
 #include <Shellminator-IO.hpp>
 #include <Commander-API.hpp>
 #include <Commander-IO.hpp>
+#include <mutex>
 
 #include "parser_utils.h"
 #include "logo_wcli.h"
@@ -63,6 +64,7 @@ class ESP32WifiCLI {
   void selectAP(int net, Stream* response = &Serial);
   void wifiAPConnect(bool save);
   bool loadAP(int net);
+  bool loadAP(String ssid);
   void multiWiFiConnect();
   bool wifiValidation();
   void enableTelnet();
@@ -76,7 +78,9 @@ class ESP32WifiCLI {
   void radioOff();
   void scan();
   void setSSID(String ssid);
-  void setPASW(String pasw);
+  void setPASW(String pasw); 
+  String getCurrentSSID();
+  String getCurrentPASW();
   void connect();
   void status(Stream *response = &Serial);
   void list();
@@ -85,13 +89,13 @@ class ESP32WifiCLI {
 
   void deleteNetwork(String ssid, Stream *response = &Serial);
   void loadSavedNetworks(bool addAP = true, Stream *response = &Serial);
-  bool isSSIDSaved(String ssid);
+  bool isSSIDSaved(String ssid, int* net_number = nullptr);
   bool isConfigured();
   void saveNetwork(String ssid, String pasw);
   void setInt(String key, int value);
   int32_t getInt(String key, int defaultValue);
   void setString(String key, String value);
-  String getString(String key, String defaultValue);
+  String getString(String key, String defaultValue); 
   void clearSettings();
 
   void setSilentMode(bool enable = true);
@@ -109,6 +113,7 @@ class ESP32WifiCLI {
   String app_name = "wifi_cli_prefs";
   int size_ = 0;
   int isize_ = 0;
+  std::mutex cli_mtx;
 
   String getNetKeyName(uint8_t net);
 
