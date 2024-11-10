@@ -282,7 +282,7 @@ String ESP32WifiCLI::getCurrentPASW() {
 }
 
 String autoConnectStatus(){
-  return wcli.isAutoConnectEnable() ? "\033[0;32menable\033[0;37m" : "\033[0;31mdisable\033[0;37m";
+  return wcli.isAutoConnectEnable() ? "\033[0;32menabled\033[0;37m" : "\033[0;31mdisabled\033[0;37m";
 }
 
 void ESP32WifiCLI::printNetworkHelp() {
