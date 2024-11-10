@@ -61,6 +61,7 @@ static inline bool extract_connect_parames(const char* args, char** ssid, char**
     const char* password_start = strstr(args, password_prefix);
     if (password_start == NULL) {
         response->printf("Invalid command syntax\n");
+        response->println("usage: \033[0;33mconnect your_ssid password \"your_passw\"\033[0m");
         return false;
     }
 

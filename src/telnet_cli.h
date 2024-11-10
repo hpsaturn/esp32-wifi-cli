@@ -9,8 +9,8 @@ TaskHandle_t telnet_handle = NULL;
 bool isServerEnable = false;
 
 void initClientSession(const char * prompt, bool &init) {
-  if(init) return;
-  Serial.println("Telnet server ready.");
+  if (init) return;
+  if (!wcli.silent) Serial.println("Telnet server ready.");
   shellTelnet_.clear();
   shellTelnet_.begin(prompt);
   shellTelnet_.update();
@@ -48,7 +48,7 @@ void stopTelnet() {
 }
 
 String telnetStatus(){
-  return wcli.isTelnetEnable() ? "\033[0;32menable\033[0;37m" : "\033[0;31mdisable\033[0;37m";
+  return wcli.isTelnetEnable() ? "\033[0;32menabled\033[0;37m" : "\033[0;31mdisabled\033[0;37m";
 }
 
 void _nmcli_telnet(char *args, Stream *response) {
