@@ -65,7 +65,7 @@ void setup() {
   Serial.begin(115200);  // Optional, you can init it on begin()
   Serial.flush();        // Only for showing the message on serial
   
-  wcli.setCallback(new mESP32WifiCLICallbacks());
+  wcli.setCallback(new mESP32WifiCLICallbacks()); // (optional)
   wcli.setSilentMode(true);  // less debug output
 
   // Custom commands:
@@ -78,7 +78,7 @@ void setup() {
   
   wcli.shell->attachLogo(logo);
   wcli.shell->clear();
-  wcli.begin("CanAirIO"); // your prompt custom name
+  wcli.begin("MyShell"); // your prompt custom name
 }
 ```
 
@@ -150,10 +150,11 @@ The next projects are using `esp32-wifi-cli` library:
 
 ### ICENav - ESP32 Based GPS Navigator
 
-[![ICENav v3](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/icenav_shell_demo.png)](https://github.com/jgauchia/IceNav-v3/?tab=readme-ov-file#readme)
+[![ICENav v3](https://raw.githubusercontent.com/hpsaturn/esp32-wifi-cli/master/images/icenav_preview.png)](https://github.com/jgauchia/IceNav-v3/?tab=readme-ov-file#readme)
 
 ## Credits
 
-v0.3.x Extended and using [Shellminator](https://www.shellminator.org/html/index.html) by [Daniel Hajnal](https://github.com/dani007200964)
-
-v0.2.x Extended from [SerialTerminal](https://github.com/miko007/SerialTerminal) by [Michael Ochmann](https://github.com/miko007)
+- Thanks to [@jgauchia](https://github.com/jgauchia) to use and test this library in [IceNav project](https://github.com/jgauchia/IceNav-v3?tab=readme-ov-file#readme)
+- IceNav project: Thanks to @ for integrate and test it
+- v0.3.x Extended and using [Shellminator](https://www.shellminator.org/html/index.html) by [Daniel Hajnal](https://github.com/dani007200964)
+- v0.2.x Extended from [SerialTerminal](https://github.com/miko007/SerialTerminal) by [Michael Ochmann](https://github.com/miko007)
