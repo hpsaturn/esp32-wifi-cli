@@ -143,10 +143,6 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
   int retry = 0;
   WiFi.begin(temp_ssid.c_str(), temp_pasw.c_str());
 
-  #ifdef FAMILY
-  if (FAMILY == "ESP32-C3") WiFi.setTxPower(WIFI_POWER_8_5dBm);  // TODO: uggly workaround for some C3 devices
-  #endif
-
   while (WiFi.status() != WL_CONNECTED && retry++ < 20) {  // M5Atom will connect automatically
     delay(1000);
     if (!silent) Serial.print(".");
