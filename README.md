@@ -68,12 +68,12 @@ void setup() {
   wcli.setCallback(new mESP32WifiCLICallbacks()); // (optional)
   wcli.setSilentMode(true);  // less debug output
 
-  // Custom commands:
-  wcli.add("sleep", &sleep,     "\t\t<mode> <time> ESP32 sleep mode (deep/light)\r\n");
+  // Custom commands example:
+  wcli.add("sleep", &sleep,     "\t\t<mode> <time> ESP32 sleep mode (deep/light)");
   wcli.add("echo", &echo,       "\t\t\"message\" Echo the msg. Parameter into quotes");
   wcli.add("info", &info,       "\t\tsystem status info");
   wcli.add("setled", &setled,   "\t<PIN> config the LED GPIO for blink");
-  wcli.add("blink", &blink,     "\t\t<times> <millis> LED blink x times each x millis");
+  wcli.add("blink", &blink,     "\t\t<times> <millis> LED blink");
   wcli.add("reboot", &reboot,   "\tperform a ESP32 reboot");
   
   wcli.shell->attachLogo(logo);

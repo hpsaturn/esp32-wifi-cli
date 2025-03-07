@@ -94,3 +94,19 @@ bool ESP32WifiCLI::isTelnetRunning() {
   return isServerEnable;  
 }
 #endif
+
+#ifdef DISABLE_CLI_TELNET
+void ESP32WifiCLI::enableTelnet() {
+}
+
+void ESP32WifiCLI::disableTelnet() {
+}
+
+bool ESP32WifiCLI::isTelnetEnable() {
+    return false;
+}
+
+bool ESP32WifiCLI::isTelnetRunning() {
+    return false;
+}
+#endif

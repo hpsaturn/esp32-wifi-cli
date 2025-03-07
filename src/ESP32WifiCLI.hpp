@@ -17,8 +17,8 @@
 #define RW_MODE false
 #define RO_MODE true
 
-#define ESP32WIFICLI_VERSION "0.3.3"
-#define ESP32WIFICLI_REVISION 047
+#define ESP32WIFICLI_VERSION "0.3.4"
+#define ESP32WIFICLI_REVISION 048
 
 #ifndef WCLI_MAX_CMDS
 #define WCLI_MAX_CMDS 15 // user and public commands
