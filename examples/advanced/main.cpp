@@ -47,9 +47,9 @@ const char logo[] =
 class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   void onWifiStatus(bool isConnected) {
     if(isConnected) {
-      // digitalWrite(LED_PIN, HIGH);
+      digitalWrite(LED_PIN, HIGH);
     } else {
-      // digitalWrite(LED_PIN, LOW);
+      digitalWrite(LED_PIN, LOW);
     }
   }
 
@@ -92,9 +92,9 @@ void blink(char *args, Stream *response) {
   int times = operands.first().toInt();
   int miliseconds = operands.second().toInt();
   for (int i = 0; i < times; i++) {
-    // digitalWrite(LED_PIN, HIGH);
+    digitalWrite(LED_PIN, HIGH);
     delay(miliseconds);
-    // digitalWrite(LED_PIN, LOW);
+    digitalWrite(LED_PIN, LOW);
     delay(miliseconds);
   }
 }
