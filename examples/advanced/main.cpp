@@ -127,12 +127,13 @@ void reboot(char *args, Stream *response){
 }
 
 void setup() {
-  Serial.begin(115200);  // Optional, you can init it on begin()
-  Serial.flush();        // Only for showing the message on serial
-  delay(2000);           // Only for this demo
-  wcli.setCallback(new mESP32WifiCLICallbacks());
-  wcli.setSilentMode(true);  // less debug output
-  // wcli.clearSettings(); // Clear all networks and settings
+  Serial.begin(115200);                             
+  Serial.flush();                                   // Only for showing the message on serial
+  Serial.setDebugOutput(true);                      // Optional, debug output redirect to serial
+  delay(5000);                                      // Only for this demo. (wait for serial monitor)
+  wcli.setCallback(new mESP32WifiCLICallbacks());   // Optional, set the callback
+  wcli.setSilentMode(true);                         // less debug output
+  // wcli.clearSettings();                          // Clear all networks and settings
   
   // Enter your custom commands:
   wcli.add("sleep", &sleep,     "\t\t<mode> <time> ESP32 sleep mode (deep/light)\r\n");
