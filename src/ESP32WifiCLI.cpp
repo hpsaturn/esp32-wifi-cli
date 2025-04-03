@@ -143,7 +143,7 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
   int retry = 0;
   WiFi.begin(temp_ssid.c_str(), temp_pasw.c_str());
 
-  #if CONFIG_IDF_TARGET_ESP32C3
+  #ifdef ARDUINO_LOLIN_C3_MINI 
   WiFi.setTxPower(WIFI_POWER_8_5dBm);
   #endif
 
