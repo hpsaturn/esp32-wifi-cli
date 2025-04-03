@@ -24,8 +24,12 @@ int LED_PIN = 13; // change it via CLI using this example :D
                   // for instance if you are using a LilyGO T7 v1.5 board,
                   // set LED like this:
                   //   setled 19
-                  // and the reboot with the command reboot.
+                  // and the reboot it with the command reboot.
                   // Also the LED could be ON when the WiFi is ready.
+                  // ******************************************************
+                  // NOTE: For the ESP32C3 boards, should be other GPIO pin.
+                  //       GPIO 13 on the ESP32C3 crashes the board.
+                  // *******************************************************
 
 const char logo[] =
 "▓█████ ▒██   ██▒ ▄▄▄       ███▄ ▄███▓ ██▓███   ██▓    ▓█████ \n"
