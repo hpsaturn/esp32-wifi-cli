@@ -143,9 +143,7 @@ void ESP32WifiCLI::wifiAPConnect(bool save) {
   int retry = 0;
   WiFi.begin(temp_ssid.c_str(), temp_pasw.c_str());
 
-  #ifdef ARDUINO_LOLIN_C3_MINI 
-  WiFi.setTxPower(WIFI_POWER_8_5dBm);
-  #endif
+  if (isForcedTxPower) WiFi.setTxPower(WIFI_POWER_8_5dBm);
 
   while (WiFi.status() != WL_CONNECTED && retry++ < 20) {  // M5Atom will connect automatically
     delay(1000);
@@ -459,6 +457,8 @@ void ESP32WifiCLI::scan() { _nmcli_scan(NULL, &Serial); }
 void ESP32WifiCLI::status(Stream *response) { _nmcli_status(NULL, response); }
 
 void ESP32WifiCLI::list() { loadSavedNetworks(false); }
+
+void ESP32WifiCLI::forceTxPower() { isForcedTxPower = true; }
 
 Pair<String, String> ESP32WifiCLI::parseCommand(String args) { return ParseCommand(args); }
 

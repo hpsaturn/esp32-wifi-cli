@@ -86,6 +86,7 @@ class ESP32WifiCLI {
   void list();
   void disconnect();
   void reconnect();
+  void forceTxPower();
 
   void deleteNetwork(String ssid, Stream *response = &Serial);
   void loadSavedNetworks(bool addAP = true, Stream *response = &Serial);
@@ -114,6 +115,7 @@ class ESP32WifiCLI {
   int size_ = 0;
   int isize_ = 0;
   std::mutex cli_mtx;
+  bool isForcedTxPower = false;
 
   String getNetKeyName(uint8_t net);
 
