@@ -323,7 +323,7 @@ void _nmcli_scan(char *args, Stream *response) {
     response->println(" networks found\n");
     for (int i = 0; i < n; ++i) {
       String enc = (WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? "[O]" : "[*]";
-      response->printf("%02d %s[%i][%s]\r\n", i + 1, enc.c_str(), WiFi.RSSI(i), WiFi.SSID(i).c_str());
+      response->printf("%02d %s[%i][%s]\r\n", i + 1, enc.c_str(), (int) WiFi.RSSI(i), WiFi.SSID(i).c_str());
       delay(10);
     }
   }
