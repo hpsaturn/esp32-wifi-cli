@@ -17,8 +17,8 @@
 #define RW_MODE false
 #define RO_MODE true
 
-#define ESP32WIFICLI_VERSION "0.3.4"
-#define ESP32WIFICLI_REVISION 048
+#define ESP32WIFICLI_VERSION "0.3.5"
+#define ESP32WIFICLI_REVISION 049
 
 #ifndef WCLI_MAX_CMDS
 #define WCLI_MAX_CMDS 15 // user and public commands
@@ -86,6 +86,7 @@ class ESP32WifiCLI {
   void list();
   void disconnect();
   void reconnect();
+  void forceTxPower();
 
   void deleteNetwork(String ssid, Stream *response = &Serial);
   void loadSavedNetworks(bool addAP = true, Stream *response = &Serial);
@@ -114,6 +115,7 @@ class ESP32WifiCLI {
   int size_ = 0;
   int isize_ = 0;
   std::mutex cli_mtx;
+  bool isForcedTxPower = false;
 
   String getNetKeyName(uint8_t net);
 
