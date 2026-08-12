@@ -125,9 +125,9 @@ class ESP32WifiCLI {
 class ESP32WifiCLICallbacks {
 public:
     virtual ~ESP32WifiCLICallbacks() {};
-    virtual void onWifiStatus(bool isConnected);
-    virtual void onHelpShow();
-    virtual void onNewWifi(String ssid, String passw);
+    virtual void onWifiStatus(bool isConnected) = 0;
+    virtual void onHelpShow() = 0;
+    virtual void onNewWifi(String ssid, String passw) =0;
 };
 
 #if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_ESP32WIFICLI)
